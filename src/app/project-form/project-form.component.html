@@ -1,0 +1,144 @@
+<div class="project-form-container">
+  <div class="form-header">
+    <h1>Nuevo Proyecto</h1>
+    <p>Complete la información del proyecto y sus etapas de trabajo</p>
+  </div>
+
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+    <!-- Información del Proyecto -->
+    <div class="form-section">
+      <h2>Información del Proyecto</h2>
+      
+      <div class="form-group project-name-group">
+        <label for="nombre">Nombre del Proyecto *</label>
+        <input 
+          type="text" 
+          id="nombre" 
+          formControlName="nombre" 
+          class="form-control"
+          [class.error]="isFieldInvalid('nombre')"
+          placeholder="Ingrese el nombre del proyecto">
+        <div class="error-message" *ngIf="isFieldInvalid('nombre')">
+          {{ getFieldError('nombre') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción del Proyecto *</label>
+        <textarea 
+          id="descripcion" 
+          formControlName="descripcion" 
+          class="form-control"
+          [class.error]="isFieldInvalid('descripcion')"
+          rows="4"
+          placeholder="Describa brevemente el proyecto"></textarea>
+        <div class="error-message" *ngIf="isFieldInvalid('descripcion')">
+          {{ getFieldError('descripcion') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Etapas del Proyecto -->
+    <div class="form-section">
+      <div class="section-header">
+        <h2>Etapas del Plan de Trabajo</h2>
+        <button type="button" class="btn-add-stage" (click)="addStage()">
+          <span class="icon">+</span>
+          Agregar Etapa
+        </button>
+      </div>
+
+      <div class="stages-container" formArrayName="etapas">
+        <div 
+          *ngFor="let stage of etapas.controls; let i = index" 
+          [formGroupName]="i" 
+          class="stage-card">
+          
+          <div class="stage-header" (click)="toggleStageCollapse(i)">
+            <div class="stage-title-section">
+              <div class="btn-collapse">
+                <span class="collapse-icon" [class.collapsed]="isStageCollapsed(i)">▼</span>
+              </div>
+              <h3>Etapa {{ i + 1 }}</h3>
+            </div>
+            <button 
+              type="button" 
+              class="btn-remove-stage" 
+              (click)="removeStage(i); $event.stopPropagation()"
+              [disabled]="etapas.length === 1">
+              Eliminar
+            </button>
+          </div>
+
+          <div class="stage-content" [class.collapsed]="isStageCollapsed(i)">
+            <div class="form-row-three">
+              <div class="form-group">
+                <label [for]="'nombre-etapa-' + i">Nombre de la Etapa *</label>
+                <input 
+                  type="text" 
+                  [id]="'nombre-etapa-' + i"
+                  formControlName="nombre" 
+                  class="form-control"
+                  [class.error]="isFieldInvalid('nombre', i)"
+                  placeholder="Ej: Análisis de Requerimientos">
+                <div class="error-message" *ngIf="isFieldInvalid('nombre', i)">
+                  {{ getFieldError('nombre', i) }}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label [for]="'fecha-inicio-' + i">Fecha de Inicio *</label>
+                <input 
+                  type="date" 
+                  [id]="'fecha-inicio-' + i"
+                  formControlName="fechaInicio" 
+                  class="form-control"
+                  [class.error]="isFieldInvalid('fechaInicio', i)">
+                <div class="error-message" *ngIf="isFieldInvalid('fechaInicio', i)">
+                  {{ getFieldError('fechaInicio', i) }}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label [for]="'fecha-fin-' + i">Fecha de Fin *</label>
+                <input 
+                  type="date" 
+                  [id]="'fecha-fin-' + i"
+                  formControlName="fechaFin" 
+                  class="form-control"
+                  [class.error]="isFieldInvalid('fechaFin', i)">
+                <div class="error-message" *ngIf="isFieldInvalid('fechaFin', i)">
+                  {{ getFieldError('fechaFin', i) }}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label [for]="'pedido-cobertura-' + i">Pedido de Cobertura *</label>
+              <textarea 
+                [id]="'pedido-cobertura-' + i"
+                formControlName="pedidoCobertura" 
+                class="form-control"
+                [class.error]="isFieldInvalid('pedidoCobertura', i)"
+                rows="4"
+                placeholder="Describa los detalles del pedido de cobertura para esta etapa"></textarea>
+              <div class="error-message" *ngIf="isFieldInvalid('pedidoCobertura', i)">
+                {{ getFieldError('pedidoCobertura', i) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="resetForm()">
+        Limpiar Formulario
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="projectForm.invalid">
+        Crear Proyecto
+      </button>
+    </div>
+  </form>
+</div>

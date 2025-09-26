@@ -1,0 +1,12 @@
+.main-content {
+  min-height: calc(100vh - 80px);
+  background-color: #121212;
+  padding: 2rem 0;
+}
+
+/* Asegurar que el contenido principal tenga el fondo oscuro */
+:host {
+  display: block;
+  background-color: #121212;
+  min-height: 100vh;
+}

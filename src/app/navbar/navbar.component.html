@@ -1,0 +1,16 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <h1>Sistema de Planificación de Proyectos de Financiamiento</h1>
+    </div>
+    
+    <div class="navbar-menu">
+      <button 
+        class="nav-button"
+        [class.active]="isActive('project-form')"
+        (click)="navigateTo('project-form')">
+        Nuevo Proyecto
+      </button>
+    </div>
+  </div>
+</nav>
