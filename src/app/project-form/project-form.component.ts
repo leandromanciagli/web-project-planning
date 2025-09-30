@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Project, ProjectStage, CreateProjectRequest, Task } from '../models/project-stage.model';
+import { CreateProjectRequest } from '../models/project-task.model';
 import { ProjectService } from '../services/project.service';
 
 @Component({
@@ -13,7 +13,7 @@ import { ProjectService } from '../services/project.service';
 })
 export class ProjectFormComponent implements OnInit {
   projectForm: FormGroup;
-  collapsedStages: boolean[] = [];
+  collapsedTasks: boolean[] = [];
   isSubmitting = false;
 
   constructor(
@@ -21,54 +21,52 @@ export class ProjectFormComponent implements OnInit {
     private projectService: ProjectService
   ) {
     this.projectForm = this.fb.group({
-      nombre: ['', [Validators.required, Validators.minLength(3)]],
-      descripcion: ['', [Validators.required, Validators.minLength(10)]],
-      fechaInicio: ['', Validators.required],
-      fechaFin: ['', Validators.required],
-      ownerId: [1, [Validators.required, Validators.min(1)]],
-      etapas: this.fb.array([])
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required],
+      tasks: this.fb.array([])
     });
   }
 
   ngOnInit(): void {
     // Agregar una etapa inicial
-    this.addStage();
+    this.addTask();
   }
 
-  get etapas(): FormArray {
-    return this.projectForm.get('etapas') as FormArray;
+  get tasks(): FormArray {
+    return this.projectForm.get('tasks') as FormArray;
   }
 
-  createStageFormGroup(): FormGroup {
+  createTaskFormGroup(): FormGroup {
     return this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       priority: ['medium', Validators.required],
       dueDate: ['', Validators.required],
       estimatedHours: [1, [Validators.required, Validators.min(1)]],
-      status: ['todo', Validators.required]
     });
   }
 
-  addStage(): void {
-    const stageFormGroup = this.createStageFormGroup();
-    this.etapas.push(stageFormGroup);
+  addTask(): void {
+    const taskFormGroup = this.createTaskFormGroup();
+    this.tasks.push(taskFormGroup);
     
-    // Colapsar todas las etapas existentes
-    this.collapsedStages = this.collapsedStages.map(() => true);
+    // Colapsar todas las tasks existentes
+    this.collapsedTasks = this.collapsedTasks.map(() => true);
     // Nueva etapa inicia expandida
-    this.collapsedStages.push(false);
+    this.collapsedTasks.push(false);
     
     // Scroll automático a la nueva etapa después de un pequeño delay
     setTimeout(() => {
-      this.scrollToNewStage();
+      this.scrollToNewTask();
     }, 100);
   }
 
-  removeStage(index: number): void {
-    if (this.etapas.length > 1) {
-      this.etapas.removeAt(index);
-      this.collapsedStages.splice(index, 1); // Remover también el estado de colapso
+  removeTask(index: number): void {
+    if (this.tasks.length > 1) {
+      this.tasks.removeAt(index);
+      this.collapsedTasks.splice(index, 1); // Remover también el estado de colapso
     }
   }
 
@@ -78,18 +76,18 @@ export class ProjectFormComponent implements OnInit {
 
       // Create API request object
       const apiProjectData: CreateProjectRequest = {
-        name: this.projectForm.value.nombre,
-        description: this.projectForm.value.descripcion,
-        startDate: this.projectForm.value.fechaInicio,
-        endDate: this.projectForm.value.fechaFin,
-        ownerId: this.projectForm.value.ownerId,
-        tasks: this.projectForm.value.etapas.map((stage: any) => ({
-          title: stage.title,
-          description: stage.description,
-          priority: stage.priority,
-          dueDate: stage.dueDate,
-          estimatedHours: stage.estimatedHours,
-          status: stage.status
+        name: this.projectForm.value.name,
+        description: this.projectForm.value.description,
+        startDate: this.projectForm.value.startDate,
+        endDate: this.projectForm.value.endDate,
+        ownerId: 2,
+        tasks: this.projectForm.value.tasks.map((task: any) => ({
+          title: task.title,
+          description: task.description,
+          priority: task.priority,
+          dueDate: task.dueDate,
+          estimatedHours: task.estimatedHours,
+          status: 'todo'
         }))
       };
 
@@ -100,11 +98,11 @@ export class ProjectFormComponent implements OnInit {
         next: (response) => {
           this.isSubmitting = false;
           if (response.success) {
-            console.log('Proyecto creado exitosamente:', response.data);
-            alert(`${response.message}\nDatos enviados: ${JSON.stringify(apiProjectData, null, 2)}`);
+            // console.log('Proyecto creado exitosamente:', response.data);
+            alert(response.message);
             this.resetForm();
           } else {
-            console.error('Error en la respuesta:', response.error);
+            // console.error('Error en la respuesta:', response.error);
             alert(`Error: ${response.message || response.error}`);
           }
         },
@@ -126,7 +124,7 @@ export class ProjectFormComponent implements OnInit {
       control?.markAsTouched();
     });
 
-    this.etapas.controls.forEach(control => {
+    this.tasks.controls.forEach(control => {
       Object.keys(control.value).forEach(key => {
         control.get(key)?.markAsTouched();
       });
@@ -142,36 +140,36 @@ export class ProjectFormComponent implements OnInit {
     this.projectForm.patchValue({
       ownerId: 1 // Reset to default ownerId
     });
-    this.etapas.clear();
-    this.collapsedStages = [];
-    this.addStage();
+    this.tasks.clear();
+    this.collapsedTasks = [];
+    this.addTask();
   }
 
-  toggleStageCollapse(index: number): void {
-    const isCurrentlyCollapsed = this.collapsedStages[index];
+  toggleTaskCollapse(index: number): void {
+    const isCurrentlyCollapsed = this.collapsedTasks[index];
     
     // Si la etapa está colapsada y se va a expandir, colapsar todas las demás
     if (isCurrentlyCollapsed) {
-      // Colapsar todas las etapas
-      this.collapsedStages = this.collapsedStages.map(() => true);
+      // Colapsar todas las tasks
+      this.collapsedTasks = this.collapsedTasks.map(() => true);
       // Expandir solo la etapa actual
-      this.collapsedStages[index] = false;
+      this.collapsedTasks[index] = false;
     } else {
       // Si la etapa está expandida, colapsarla (mantener el comportamiento actual)
-      this.collapsedStages[index] = true;
+      this.collapsedTasks[index] = true;
     }
   }
 
-  isStageCollapsed(index: number): boolean {
-    return this.collapsedStages[index] || false;
+  isTaskCollapsed(index: number): boolean {
+    return this.collapsedTasks[index] || false;
   }
 
-  private scrollToNewStage(): void {
-    const stagesContainer = document.querySelector('.stages-container');
-    if (stagesContainer) {
-      const lastStageCard = stagesContainer.querySelector('.stage-card:last-child');
-      if (lastStageCard) {
-        lastStageCard.scrollIntoView({ 
+  private scrollToNewTask(): void {
+    const tasksContainer = document.querySelector('.tasks-container');
+    if (tasksContainer) {
+      const lastTaskCard = tasksContainer.querySelector('.task-card:last-child');
+      if (lastTaskCard) {
+        lastTaskCard.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'start',
           inline: 'nearest'
@@ -180,10 +178,10 @@ export class ProjectFormComponent implements OnInit {
     }
   }
 
-  isFieldInvalid(fieldName: string, stageIndex?: number): boolean {
-    if (stageIndex !== undefined) {
-      const stageControl = this.etapas.at(stageIndex);
-      const field = stageControl.get(fieldName);
+  isFieldInvalid(fieldName: string, taskIndex?: number): boolean {
+    if (taskIndex !== undefined) {
+      const taskControl = this.tasks.at(taskIndex);
+      const field = taskControl.get(fieldName);
       return field ? field.invalid && field.touched : false;
     }
     
@@ -191,10 +189,10 @@ export class ProjectFormComponent implements OnInit {
     return field ? field.invalid && field.touched : false;
   }
 
-  getFieldError(fieldName: string, stageIndex?: number): string {
-    if (stageIndex !== undefined) {
-      const stageControl = this.etapas.at(stageIndex);
-      const field = stageControl.get(fieldName);
+  getFieldError(fieldName: string, taskIndex?: number): string {
+    if (taskIndex !== undefined) {
+      const taskControl = this.tasks.at(taskIndex);
+      const field = taskControl.get(fieldName);
       
       if (field?.errors) {
         if (field.errors['required']) return 'Este campo es requerido';
