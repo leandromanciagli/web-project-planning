@@ -1,11 +1,4 @@
-export interface Task {
-  title: string;
-  description: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  dueDate: string;
-  estimatedHours: number;
-  status: 'todo' | 'in-progress' | 'completed' | 'on-hold';
-}
+import { Task } from "./Task";
 
 export interface CreateProjectRequest {
   name: string;

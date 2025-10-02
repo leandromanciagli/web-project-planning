@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CreateProjectRequest } from '../models/project-task.model';
 import { ProjectService } from '../services/project.service';
+import { OngService } from '../services/ong.service';
+import { TaskTypeService } from '../services/taskType.service';
 
 @Component({
   selector: 'app-project-form',
@@ -11,31 +13,150 @@ import { ProjectService } from '../services/project.service';
   templateUrl: './project-form.component.html',
   styleUrl: './project-form.component.css'
 })
+
 export class ProjectFormComponent implements OnInit {
   projectForm: FormGroup;
   collapsedTasks: boolean[] = [];
   isSubmitting = false;
+  isLoading = true;
+  ongs: any[] = [];
+  taskTypes: any[] = [];
+
+  // Custom validator for start date
+  private startDateValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // Let required validator handle empty values
+    }
+    
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+    
+    if (selectedDate < today) {
+      return { startDateInPast: true };
+    }
+    
+    return null;
+  }
+
+  // Custom validator for end date
+  private endDateValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // Let required validator handle empty values
+    }
+    
+    const endDate = new Date(control.value);
+    const startDate = this.projectForm.get('startDate')?.value;
+    
+    if (!startDate) {
+      return null; // Can't validate if start date is not set yet
+    }
+    
+    const startDateObj = new Date(startDate);
+    
+    if (endDate < startDateObj) {
+      return { endDateBeforeStart: true };
+    }
+    
+    return null;
+  }
+
+  // Custom validator for task due date (must be >= project start date and <= project end date)
+  private taskDueDateValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // Let required validator handle empty values
+    }
+
+    const projectStartDate = this.projectForm.get('startDate')?.value;
+    const projectEndDate = this.projectForm.get('endDate')?.value;
+    
+    if (!projectStartDate || !projectEndDate) {
+      return null; // Can't validate if project dates are not set yet
+    }
+
+    const dueDate = new Date(control.value);
+    const startDateObj = new Date(projectStartDate);
+    const endDateObj = new Date(projectEndDate);
+
+    if (dueDate < startDateObj) {
+      return { dueDateBeforeProjectStart: true };
+    }
+    
+    if (dueDate > endDateObj) {
+      return { dueDateAfterProjectEnd: true };
+    }
+
+    return null;
+  }
 
   constructor(
     private fb: FormBuilder,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private ongService: OngService,
+    private taskTypeService: TaskTypeService
   ) {
     this.projectForm = this.fb.group({
+      ong: ['', Validators.required],
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
+      startDate: ['', [Validators.required, this.startDateValidator.bind(this)]],
+      endDate: ['', [Validators.required, this.endDateValidator.bind(this)]],
       tasks: this.fb.array([])
     });
   }
 
   ngOnInit(): void {
-    // Agregar una etapa inicial
+    this.loadOngs();
+    this.loadTaskTypes();    
     this.addTask();
+    
+    // Add reactive validation for end date when start date changes
+    this.projectForm.get('startDate')?.valueChanges.subscribe(() => {
+      this.projectForm.get('endDate')?.updateValueAndValidity();
+      // Also revalidate all task due dates when start date changes
+      this.tasks.controls.forEach(taskCtrl => {
+        taskCtrl.get('dueDate')?.updateValueAndValidity();
+      });
+    });
+
+    // Revalidate all task due dates when project end date changes
+    this.projectForm.get('endDate')?.valueChanges.subscribe(() => {
+      this.tasks.controls.forEach(taskCtrl => {
+        taskCtrl.get('dueDate')?.updateValueAndValidity();
+      });
+    });
   }
 
-  get tasks(): FormArray {
-    return this.projectForm.get('tasks') as FormArray;
+  loadOngs() {
+    this.isLoading = true;
+    this.ongService.getAll().subscribe(
+      {
+        next: (data) => {
+          this.ongs = data;          
+          this.isLoading = false;
+        },
+        error: (e) => {
+          console.log(e);
+          this.isLoading = false;
+        }
+      }
+    );
+  }
+
+  loadTaskTypes() {
+    this.isLoading = true;
+    this.taskTypeService.getAll().subscribe(
+      {
+        next: (data) => {          
+          this.taskTypes = data;
+          this.isLoading = false;
+        },
+        error: (e) => {
+          console.log(e);
+          this.isLoading = false;
+        }
+      }
+    );
   }
 
   createTaskFormGroup(): FormGroup {
@@ -43,8 +164,10 @@ export class ProjectFormComponent implements OnInit {
       title: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       priority: ['medium', Validators.required],
-      dueDate: ['', Validators.required],
+      dueDate: ['', [Validators.required, this.taskDueDateValidator.bind(this)]],
       estimatedHours: [1, [Validators.required, Validators.min(1)]],
+      taskTypeId: ['', Validators.required],
+      isCoverageRequest: [false]
     });
   }
 
@@ -57,10 +180,12 @@ export class ProjectFormComponent implements OnInit {
     // Nueva etapa inicia expandida
     this.collapsedTasks.push(false);
     
-    // Scroll automático a la nueva etapa después de un pequeño delay
-    setTimeout(() => {
-      this.scrollToNewTask();
-    }, 100);
+    if (this.tasks.length > 1) {            
+      // Scroll automático a la nueva etapa después de un pequeño delay
+      setTimeout(() => {
+        this.scrollToNewTask();
+      }, 100);
+    }
   }
 
   removeTask(index: number): void {
@@ -76,18 +201,20 @@ export class ProjectFormComponent implements OnInit {
 
       // Create API request object
       const apiProjectData: CreateProjectRequest = {
+        ownerId: this.projectForm.value.ong,
         name: this.projectForm.value.name,
         description: this.projectForm.value.description,
         startDate: this.projectForm.value.startDate,
         endDate: this.projectForm.value.endDate,
-        ownerId: 2,
         tasks: this.projectForm.value.tasks.map((task: any) => ({
           title: task.title,
           description: task.description,
           priority: task.priority,
           dueDate: task.dueDate,
           estimatedHours: task.estimatedHours,
-          status: 'todo'
+          status: 'todo',
+          taskTypeId: task.taskTypeId,
+          isCoverageRequest: task.isCoverageRequest
         }))
       };
 
@@ -138,7 +265,7 @@ export class ProjectFormComponent implements OnInit {
   resetForm(): void {
     this.projectForm.reset();
     this.projectForm.patchValue({
-      ownerId: 1 // Reset to default ownerId
+      ong: ''
     });
     this.tasks.clear();
     this.collapsedTasks = [];
@@ -198,6 +325,10 @@ export class ProjectFormComponent implements OnInit {
         if (field.errors['required']) return 'Este campo es requerido';
         if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
         if (field.errors['min']) return `El valor mínimo es ${field.errors['min'].min}`;
+        if (field.errors['startDateInPast']) return 'La fecha de inicio no puede ser anterior a la fecha actual';
+        if (field.errors['endDateBeforeStart']) return 'La fecha de fin no puede ser anterior a la fecha de inicio';
+        if (field.errors['dueDateAfterProjectEnd']) return 'La fecha de vencimiento no puede superar la fecha de fin del proyecto';
+        if (field.errors['dueDateBeforeProjectStart']) return 'La fecha de vencimiento no puede ser anterior a la fecha de inicio del proyecto';
       }
     } else {
       const field = this.projectForm.get(fieldName);
@@ -206,9 +337,48 @@ export class ProjectFormComponent implements OnInit {
         if (field.errors['required']) return 'Este campo es requerido';
         if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
         if (field.errors['min']) return `El valor mínimo es ${field.errors['min'].min}`;
+        if (field.errors['startDateInPast']) return 'La fecha de inicio no puede ser anterior a la fecha actual';
+        if (field.errors['endDateBeforeStart']) return 'La fecha de fin no puede ser anterior a la fecha de inicio';
       }
     }
     
+    return '';
+  }
+
+  get ong() {
+    return this.projectForm.get('ong')!;
+  }
+
+  get tasks(): FormArray {
+    return this.projectForm.get('tasks') as FormArray;
+  }
+
+  getTodayDate(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  }
+
+  getMinEndDate(): string {
+    const startDate = this.projectForm.get('startDate')?.value;
+    if (startDate) {
+      return startDate;
+    }
+    return this.getTodayDate();
+  }
+
+  getMinTaskDueDate(): string {
+    const startDate = this.projectForm.get('startDate')?.value;
+    if (startDate) {
+      return startDate;
+    }
+    return this.getTodayDate();
+  }
+
+  getMaxTaskDueDate(): string {
+    const endDate = this.projectForm.get('endDate')?.value;
+    if (endDate) {
+      return endDate;
+    }
     return '';
   }
 }

@@ -77,6 +77,12 @@
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 }
 
+.btn-add-task:disabled {
+  background: #495057;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .btn-add-task .icon {
   font-size: 1.2rem;
   font-weight: bold;
@@ -214,13 +220,29 @@
   gap: 1rem;
 }
 
+.form-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 .form-row-three {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   gap: 1rem;
 }
 
+.form-row-four {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
 @media (max-width: 1024px) {
+  .form-row-two {
+    grid-template-columns: 1fr 1fr;
+  }
+  
   .form-row-three {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;
@@ -233,6 +255,10 @@
 
 @media (max-width: 768px) {
   .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row-two {
     grid-template-columns: 1fr;
   }
   
@@ -427,4 +453,166 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #6c757d;
+}
+
+/* Loader Styles */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.loader {
+  text-align: center;
+  color: #6c757d;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Estilos para inputs de fecha - hacer todo el campo clickeable */
+input[type="date"] {
+  cursor: pointer;
+  position: relative;
+}
+
+/* Ocultar el icono del calendario nativo y hacer todo el campo clickeable */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Para Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Asegurar que el texto del placeholder sea clickeable */
+input[type="date"]::-webkit-input-placeholder {
+  pointer-events: none;
+}
+
+input[type="date"]::-moz-placeholder {
+  pointer-events: none;
+}
+
+input[type="date"]:-ms-input-placeholder {
+  pointer-events: none;
+}
+
+/* Estilo adicional para mejorar la experiencia visual */
+input[type="date"]:hover {
+  border-color: #64748b;
+}
+
+input[type="date"]:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+/* Estilos para el checkbox de cobertura */
+.title-with-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Centrar verticalmente con el input */
+  gap: 1rem;
+}
+
+.title-input {
+  flex: 1;
+  min-width: 0; /* Permite que el input se encoja */
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.50rem 1rem;
+  background: #1e293b;
+  border-radius: 6px;
+  border: 2px solid #475569;
+  transition: all 0.3s ease;
+  flex-shrink: 0; /* Evita que se encoja */
+  min-width: 220px; /* Ancho mínimo para el texto */
+  height: fit-content; /* Ajustar altura al contenido */
+}
+
+.coverage-checkbox {
+  width: 22px;
+  height: 22px;
+  accent-color: #059669;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid #64748b;
+  background: #1e293b;
+  transition: all 0.3s ease;
+}
+
+.checkbox-label {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+  line-height: 1.4;
+}
+
+
+/* Responsive para el checkbox */
+@media (max-width: 768px) {
+  .title-with-checkbox {
+    gap: 0.75rem;
+  }
+  
+  .checkbox-container {
+    padding: 0.6rem 0.8rem;
+    min-width: 180px; /* Reducir ancho mínimo en móviles */
+  }
+  
+  .coverage-checkbox {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .checkbox-label {
+    font-size: 0.9rem;
+  }
 }

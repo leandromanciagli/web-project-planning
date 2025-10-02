@@ -4,69 +4,80 @@
     <p>Complete la información del proyecto y sus etapas de trabajo</p>
   </div>
 
-  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+  <!-- Loader -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="loader">
+      <div class="spinner"></div>
+      <p>Cargando...</p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <form *ngIf="!isLoading" [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
     <!-- Información del Proyecto -->
     <div class="form-section">
       <h2>Información del Proyecto</h2>
 
-      <div class="form-row-three mb-1">
-        <div class="form-group">
-          <label for="name">Nombre del Proyecto *</label>
-          <input 
-            type="text" 
-            id="name" 
-            formControlName="name" 
-            class="form-control"
-            [class.error]="isFieldInvalid('name')"
-            placeholder="Ingrese el nombre del proyecto">
-          <div class="error-message" *ngIf="isFieldInvalid('name')">
-            {{ getFieldError('name') }}
-          </div>
+      <div class="form-group mb-1">
+        <label for="ong" class="form-label">ONG Originante *</label>
+        <select class="form-control" id="ong" formControlName="ong">
+          <option value="">Seleccione una ONG</option>
+          <option *ngFor="let ong of ongs" [value]="ong.id">{{ ong.organizationName }}</option>
+        </select>
+        <div class="error-message" *ngIf="isFieldInvalid('ong')">
+          {{ getFieldError('ong') }}
         </div>
+      </div>
 
-        <div class="form-group">
+      <div class="form-group mb-1">
+        <label for="name">Nombre del Proyecto *</label>
+        <input 
+          type="text" 
+          id="name" 
+          formControlName="name" 
+          class="form-control"
+          [class.error]="isFieldInvalid('name')"
+          placeholder="Ingrese el nombre del proyecto">
+        <div class="error-message" *ngIf="isFieldInvalid('name')">
+          {{ getFieldError('name') }}
+        </div>
+      </div>
+
+      <div class="form-group mb-1">
+        <label for="description">Descripción del Proyecto *</label>
+        <textarea id="description" formControlName="description" class="form-control"
+          [class.error]="isFieldInvalid('description')" rows="4" placeholder="Describa brevemente el proyecto"></textarea>
+        <div class="error-message" *ngIf="isFieldInvalid('description')">
+          {{ getFieldError('description') }}
+        </div>
+      </div>
+
+      <div class="form-row-two">
+        <div class="form-group mb-1">
           <label for="startDate">Fecha de Inicio del Proyecto *</label>
           <input type="date" id="startDate" formControlName="startDate" class="form-control"
-            [class.error]="isFieldInvalid('startDate')">
+            [class.error]="isFieldInvalid('startDate')" [min]="getTodayDate()">
           <div class="error-message" *ngIf="isFieldInvalid('startDate')">
             {{ getFieldError('startDate') }}
           </div>
         </div>
         
-        <div class="form-group">
+        <div class="form-group mb-1">
           <label for="endDate">Fecha de Fin del Proyecto *</label>
           <input type="date" id="endDate" formControlName="endDate" class="form-control"
-            [class.error]="isFieldInvalid('endDate')">
+            [class.error]="isFieldInvalid('endDate')" [min]="getMinEndDate()">
           <div class="error-message" *ngIf="isFieldInvalid('endDate')">
             {{ getFieldError('endDate') }}
           </div>
         </div>
       </div>
 
-
-      <div class="form-group">
-        <label for="description">Descripción del Proyecto *</label>
-        <textarea 
-          id="description" 
-          formControlName="description" 
-          class="form-control"
-          [class.error]="isFieldInvalid('description')"
-          rows="4"
-          placeholder="Describa brevemente el proyecto"></textarea>
-        <div class="error-message" *ngIf="isFieldInvalid('description')">
-          {{ getFieldError('description') }}
-        </div>
-      </div>
     </div>
 
     <!-- Tareas del Proyecto -->
     <div class="form-section">
       <div class="section-header">
         <h2>Tareas del Proyecto</h2>
-        <button type="button" class="btn-add-task" (click)="addTask()">
-          <span class="icon">+</span>
-          Agregar Tarea
-        </button>
       </div>
 
       <div class="tasks-container" formArrayName="tasks">
@@ -94,13 +105,25 @@
           <div class="task-content" [class.collapsed]="isTaskCollapsed(i)">
             <div class="form-group">
               <label [for]="'title-tarea-' + i">Título de la Tarea *</label>
-              <input 
-                type="text" 
-                [id]="'title-tarea-' + i"
-                formControlName="title" 
-                class="form-control"
-                [class.error]="isFieldInvalid('title', i)"
-                placeholder="Ingrese el título de la tarea">
+              <div class="title-with-checkbox">
+                <input 
+                  type="text" 
+                  [id]="'title-tarea-' + i"
+                  formControlName="title" 
+                  class="form-control title-input"
+                  [class.error]="isFieldInvalid('title', i)"
+                  placeholder="Ingrese el título de la tarea">
+                <div class="checkbox-container">
+                  <input 
+                    type="checkbox" 
+                    [id]="'coverage-' + i"
+                    formControlName="isCoverageRequest"
+                    class="coverage-checkbox">
+                  <label [for]="'coverage-' + i" class="checkbox-label">
+                    Publicar como pedido de cobertura
+                  </label>
+                </div>
+              </div>
               <div class="error-message" *ngIf="isFieldInvalid('title', i)">
                 {{ getFieldError('title', i) }}
               </div>
@@ -120,7 +143,20 @@
               </div>
             </div>
             
-            <div class="form-row-three">
+            <div class="form-row-four">
+
+              <div class="form-group">
+                <label [for]="'taskType-' + i">Tipo de Tarea *</label>
+                <select [id]="'taskType-' + i" formControlName="taskTypeId" class="form-control"
+                  [class.error]="isFieldInvalid('taskTypeId', i)">
+                  <option value="">Seleccione un tipo de tarea</option>
+                  <option *ngFor="let type of taskTypes" [value]="type.id">{{ type.title }}</option>
+                </select>
+                <div class="error-message" *ngIf="isFieldInvalid('taskTypeId', i)">
+                  {{ getFieldError('taskTypeId', i) }}
+                </div>
+              </div>
+
               <div class="form-group">
                 <label [for]="'priority-' + i">Prioridad *</label>
                 <select [id]="'priority-' + i" formControlName="priority" class="form-control"
@@ -138,7 +174,9 @@
               <div class="form-group">
                 <label [for]="'dueDate-' + i">Fecha de Vencimiento *</label>
                 <input type="date" [id]="'dueDate-' + i" formControlName="dueDate" class="form-control"
-                  [class.error]="isFieldInvalid('dueDate', i)">
+                  [class.error]="isFieldInvalid('dueDate', i)" 
+                  [min]="getMinTaskDueDate()" 
+                  [max]="getMaxTaskDueDate()">
                 <div class="error-message" *ngIf="isFieldInvalid('dueDate', i)">
                   {{ getFieldError('dueDate', i) }}
                 </div>
@@ -156,6 +194,12 @@
 
           </div>
         </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn-add-task" (click)="addTask()" [disabled]="projectForm.invalid">
+          <span class="icon">+</span>
+          Agregar Tarea
+        </button>
       </div>
     </div>
 
