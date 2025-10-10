@@ -1,0 +1,59 @@
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div>
+        <label>Nombre</label>
+        <input type="text" formControlName="nombre">
+        <div *ngIf="registerForm.get('nombre')?.touched && registerForm.get('nombre')?.invalid">
+            <small class="error">El nombre es obligatorio</small>
+        </div>
+    </div>
+
+    <div>
+        <label>Email de contacto</label>
+        <input type="email" formControlName="emailContacto">
+        <div *ngIf="registerForm.get('emailContacto')?.touched && registerForm.get('emailContacto')?.hasError('email')">
+            <small class="error">Formato de email inválido</small>
+        </div>
+    </div>
+
+    <div>
+        <label>Teléfono</label>
+        <input type="text" formControlName="telefono">
+        <div *ngIf="registerForm.get('telefono')?.touched && registerForm.get('telefono')?.invalid">
+            <small class="error">Debe contener entre 7 y 15 números</small>
+        </div>
+    </div>
+
+    <div>
+        <label>Dirección</label>
+        <input type="text" formControlName="direccion">
+        <div *ngIf="registerForm.get('direccion')?.touched && registerForm.get('direccion')?.invalid">
+            <small class="error">Campo obligatorio</small>
+        </div>
+    </div>
+
+    <div>
+        <label>CUIT</label>
+        <input type="text" formControlName="cuit">
+        <div *ngIf="registerForm.get('cuit')?.touched && registerForm.get('cuit')?.invalid">
+            <small class="error">Debe tener 11 números</small>
+        </div>
+    </div>
+
+    <div>
+        <label>Contraseña</label>
+        <input type="password" formControlName="password">
+        <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')">
+            <small class="error">Mínimo 6 caracteres</small>
+        </div>
+    </div>
+
+    <div>
+        <label>Confirmar contraseña</label>
+        <input type="password" formControlName="confirmPassword">
+        <div *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched">
+            <small class="error">Las contraseñas no coinciden</small>
+        </div>
+    </div>
+
+    <button type="submit">Registrarse</button>
+</form>
