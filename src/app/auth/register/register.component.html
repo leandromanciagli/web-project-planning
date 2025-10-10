@@ -1,52 +1,79 @@
 <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+    <!-- Nombre de usuario -->
     <div>
-        <label>Nombre</label>
-        <input type="text" formControlName="nombre">
-        <div *ngIf="registerForm.get('nombre')?.touched && registerForm.get('nombre')?.invalid">
-            <small class="error">El nombre es obligatorio</small>
+        <label>Nombre de usuario</label>
+        <input type="text" formControlName="username">
+        <div *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid">
+            <small class="error">El nombre de usuario es obligatorio</small>
         </div>
     </div>
 
+    <!-- Email -->
     <div>
-        <label>Email de contacto</label>
-        <input type="email" formControlName="emailContacto">
-        <div *ngIf="registerForm.get('emailContacto')?.touched && registerForm.get('emailContacto')?.hasError('email')">
+        <label>Email</label>
+        <input type="email" formControlName="email">
+        <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')">
             <small class="error">Formato de email inválido</small>
         </div>
     </div>
 
+    <!-- Teléfono -->
     <div>
         <label>Teléfono</label>
-        <input type="text" formControlName="telefono">
-        <div *ngIf="registerForm.get('telefono')?.touched && registerForm.get('telefono')?.invalid">
+        <input type="text" formControlName="phone">
+        <div *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid">
             <small class="error">Debe contener entre 7 y 15 números</small>
         </div>
     </div>
 
+    <!-- Nombre de la organización -->
     <div>
-        <label>Dirección</label>
-        <input type="text" formControlName="direccion">
-        <div *ngIf="registerForm.get('direccion')?.touched && registerForm.get('direccion')?.invalid">
-            <small class="error">Campo obligatorio</small>
+        <label>Nombre de la organización</label>
+        <input type="text" formControlName="organizationName">
+        <div *ngIf="registerForm.get('organizationName')?.touched && registerForm.get('organizationName')?.invalid">
+            <small class="error">El nombre de la organización es obligatorio</small>
         </div>
     </div>
 
+    <!-- Descripción -->
     <div>
-        <label>CUIT</label>
-        <input type="text" formControlName="cuit">
-        <div *ngIf="registerForm.get('cuit')?.touched && registerForm.get('cuit')?.invalid">
-            <small class="error">Debe tener 11 números</small>
+        <label>Descripción</label>
+        <textarea formControlName="description" rows="3"></textarea>
+        <div *ngIf="registerForm.get('description')?.touched && registerForm.get('description')?.invalid">
+            <small class="error">La descripción es obligatoria</small>
         </div>
     </div>
 
+    <!-- Sitio web -->
+    <div>
+        <label>Sitio web</label>
+        <input type="text" formControlName="website">
+    </div>
+
+    <!-- Rol -->
+    <div>
+        <label>Rol</label>
+        <select formControlName="role">
+            <option value="admin">Administrado</option>
+            <option value="ong">ONG</option>
+            <option value="collaborator">Colaborador</option>
+        </select>
+        <div *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.invalid">
+            <small class="error">Debe seleccionar un rol</small>
+        </div>
+    </div>
+
+    <!-- Contraseña -->
     <div>
         <label>Contraseña</label>
         <input type="password" formControlName="password">
         <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')">
-            <small class="error">Mínimo 6 caracteres</small>
+            <small class="error">La contraseña debe tener al menos 6 caracteres</small>
         </div>
     </div>
 
+    <!-- Confirmar contraseña -->
     <div>
         <label>Confirmar contraseña</label>
         <input type="password" formControlName="confirmPassword">
@@ -55,5 +82,7 @@
         </div>
     </div>
 
+    <!-- Botón de envío -->
     <button type="submit">Registrarse</button>
+
 </form>

@@ -25,3 +25,12 @@ button {
     border: none;
     border-radius: 6px;
 }
+
+input.ng-touched.ng-invalid {
+    border: 1px solid red;
+}
+
+.error {
+    color: red;
+    font-size: 0.8em;
+}
