@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { AuthService } from './services/login.service';
 
 @Component({
   selector: 'app-root',
@@ -11,4 +12,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 })
 export class AppComponent {
   title = 'web-project-planning';
+
+  constructor(public authService: AuthService) { }
+
+  logout() {
+    this.authService.logout();
+  }
 }

@@ -1,88 +1,100 @@
-<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+<div class="register-container">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-    <!-- Nombre de usuario -->
-    <div>
-        <label>Nombre de usuario</label>
-        <input type="text" formControlName="username">
-        <div *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid">
-            <small class="error">El nombre de usuario es obligatorio</small>
+        <!-- Nombre de usuario -->
+        <div class="form-group">
+            <label>Nombre de usuario</label>
+            <input type="text" formControlName="username" class="form-input">
+            <small *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid" class="error">
+                El nombre de usuario es obligatorio
+            </small>
         </div>
-    </div>
 
-    <!-- Email -->
-    <div>
-        <label>Email</label>
-        <input type="email" formControlName="email">
-        <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')">
-            <small class="error">Formato de email inválido</small>
+        <!-- Email -->
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" class="form-input">
+            <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')"
+                class="error">
+                Formato de email inválido
+            </small>
         </div>
-    </div>
 
-    <!-- Teléfono -->
-    <div>
-        <label>Teléfono</label>
-        <input type="text" formControlName="phone">
-        <div *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid">
-            <small class="error">Debe contener entre 7 y 15 números</small>
+        <!-- Teléfono -->
+        <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" formControlName="phone" class="form-input">
+            <small *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid" class="error">
+                Debe contener entre 7 y 15 números
+            </small>
         </div>
-    </div>
 
-    <!-- Nombre de la organización -->
-    <div>
-        <label>Nombre de la organización</label>
-        <input type="text" formControlName="organizationName">
-        <div *ngIf="registerForm.get('organizationName')?.touched && registerForm.get('organizationName')?.invalid">
-            <small class="error">El nombre de la organización es obligatorio</small>
+        <!-- Nombre de la organización -->
+        <div class="form-group">
+            <label>Nombre de la organización</label>
+            <input type="text" formControlName="organizationName" class="form-input">
+            <small
+                *ngIf="registerForm.get('organizationName')?.touched && registerForm.get('organizationName')?.invalid"
+                class="error">
+                El nombre de la organización es obligatorio
+            </small>
         </div>
-    </div>
 
-    <!-- Descripción -->
-    <div>
-        <label>Descripción</label>
-        <textarea formControlName="description" rows="3"></textarea>
-        <div *ngIf="registerForm.get('description')?.touched && registerForm.get('description')?.invalid">
-            <small class="error">La descripción es obligatoria</small>
+        <!-- Descripción -->
+        <div class="form-group">
+            <label>Descripción</label>
+            <textarea formControlName="description" rows="3" class="form-input"></textarea>
+            <small *ngIf="registerForm.get('description')?.touched && registerForm.get('description')?.invalid"
+                class="error">
+                La descripción es obligatoria
+            </small>
         </div>
-    </div>
 
-    <!-- Sitio web -->
-    <div>
-        <label>Sitio web</label>
-        <input type="text" formControlName="website">
-    </div>
-
-    <!-- Rol -->
-    <div>
-        <label>Rol</label>
-        <select formControlName="role">
-            <option value="admin">Administrado</option>
-            <option value="ong">ONG</option>
-            <option value="collaborator">Colaborador</option>
-        </select>
-        <div *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.invalid">
-            <small class="error">Debe seleccionar un rol</small>
+        <!-- Sitio web -->
+        <div class="form-group">
+            <label>Sitio web</label>
+            <input type="text" formControlName="website" class="form-input">
+            <small *ngIf="registerForm.get('website')?.errors?.['invalidUrl'] && registerForm.get('website')?.touched"
+                class="error">
+                Ingrese una URL válida (ej: https://example.com)
+            </small>
         </div>
-    </div>
 
-    <!-- Contraseña -->
-    <div>
-        <label>Contraseña</label>
-        <input type="password" formControlName="password">
-        <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')">
-            <small class="error">La contraseña debe tener al menos 6 caracteres</small>
+        <!-- Rol -->
+        <div class="form-group">
+            <label>Rol</label>
+            <select formControlName="role" class="form-input">
+                <option value="admin">Administrador</option>
+                <option value="ong">ONG</option>
+                <option value="collaborator">Colaborador</option>
+            </select>
+            <small *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.invalid" class="error">
+                Debe seleccionar un rol
+            </small>
         </div>
-    </div>
 
-    <!-- Confirmar contraseña -->
-    <div>
-        <label>Confirmar contraseña</label>
-        <input type="password" formControlName="confirmPassword">
-        <div *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched">
-            <small class="error">Las contraseñas no coinciden</small>
+        <!-- Contraseña -->
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" formControlName="password" class="form-input">
+            <small *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')"
+                class="error">
+                La contraseña debe tener al menos 6 caracteres
+            </small>
         </div>
-    </div>
 
-    <!-- Botón de envío -->
-    <button type="submit">Registrarse</button>
+        <!-- Confirmar contraseña -->
+        <div class="form-group">
+            <label>Confirmar contraseña</label>
+            <input type="password" formControlName="confirmPassword" class="form-input">
+            <small *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched"
+                class="error">
+                Las contraseñas no coinciden
+            </small>
+        </div>
 
-</form>
+        <!-- Botón de envío -->
+        <button type="submit" class="btn-submit">Registrarse</button>
+
+    </form>
+</div>

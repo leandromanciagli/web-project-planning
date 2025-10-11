@@ -3,14 +3,22 @@
     <div class="navbar-brand">
       <h1>Sistema de Planificación de Proyectos de Financiamiento</h1>
     </div>
-    
+
+    <!-- Menú de navegación -->
     <div class="navbar-menu">
-      <button 
-        class="nav-button"
-        [class.active]="isActive('project-form')"
-        (click)="navigateTo('project-form')">
-        Nuevo Proyecto
+      <!-- Mostrar solo si está logueado -->
+      <button *ngIf="isLoggedIn" class="nav-button" routerLink="/projects/new">
+        Registrar Proyecto
       </button>
+
+      <button *ngIf="isLoggedIn" class="nav-button" (click)="logout()">
+        Cerrar sesión
+      </button>
+
+      <!-- Mostrar solo en register y si NO está logueado -->
+      <a *ngIf="!isLoggedIn && currentRoute === '/register'" class="nav-button" routerLink="/login">
+        Iniciar sesión
+      </a>
     </div>
   </div>
 </nav>
