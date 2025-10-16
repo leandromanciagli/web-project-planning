@@ -5,6 +5,7 @@ import { RegisterComponent } from '@/components/auth/register/register.component
 import { LoginComponent } from '@/components/auth/login/login.component';
 import { HomeComponent } from '@/components/app/home/home.component';
 import { ProjectFormComponent } from '@/components/projects/project-form/project-form.component';
+import { ProjectsListComponent } from '@/components/projects/projects-list/projects-list.component';
 
 export const routes: Routes = [
   // Rutas públicas (navbar visible)
@@ -18,7 +19,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'projects', pathMatch: 'full' },
-      { path: 'projects', component: ProjectFormComponent },
+      { path: 'projects', component: ProjectsListComponent },
       { path: 'create-project', component: ProjectFormComponent }
     ]
   },

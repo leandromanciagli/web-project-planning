@@ -1,0 +1,71 @@
+<div class="projects-container">
+  <div class="header">
+    <h2>Lista de Proyectos</h2>
+  </div>
+
+  <div class="table-container">
+    <table class="projects-table">
+      <thead>
+        <tr>
+          <!-- <th>ID</th> -->
+          <th>Nombre</th>
+          <!-- <th>Descripción</th> -->
+          <th>Estado</th>
+          <th>Fecha Inicio</th>
+          <th>Fecha Fin</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let project of projects">
+          <!-- <td>{{ project.id }}</td> -->
+          <td>{{ project.name }}</td>
+          <!-- <td>{{ project.description }}</td> -->
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(project.status)">
+              {{ project.status }}
+            </span>
+          </td>
+          <td>{{ project.startDate }}</td>
+          <td>{{ project.endDate }}</td>
+          <td>
+            <button class="btn btn-info" (click)="openTasksModal(project)">
+              Ver Tareas
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal para mostrar tareas -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Tareas del Proyecto: {{ selectedProject?.name }}</h3>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="tasks-container">
+          <div class="task-card" *ngFor="let task of selectedProject?.tasks">
+            <div class="task-header">
+              <h4>{{ task.title }}</h4>
+              <span class="task-status" [ngClass]="getStatusClass(task.status)">
+                {{ task.status }}
+              </span>
+            </div>
+            <p class="task-description">{{ task.description }}</p>
+            <div class="task-footer">
+              <span class="task-assigned">Asignado a: {{ task.assignedTo }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
