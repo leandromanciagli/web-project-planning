@@ -1,0 +1,30 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <h1>Sistema de Planificación de Proyectos de Financiamiento</h1>
+    </div>
+
+    <!-- Menú de navegación -->
+    <div class="navbar-menu">
+      <!-- Opciones para usuarios logueados -->
+      <div *ngIf="isLoggedIn" class="nav-section">
+        <button class="nav-button" routerLink="/app/projects" routerLinkActive="active">
+          Proyectos
+        </button>
+        <button class="nav-button" routerLink="/app/create-project" routerLinkActive="active">
+          Crear Proyecto
+        </button>
+        <button class="nav-button" (click)="logout()">
+          Cerrar sesión
+        </button>
+      </div>
+
+      <!-- Opciones para usuarios no logueados -->
+      <div *ngIf="!isLoggedIn && currentRoute === '/register'" class="nav-section">
+        <button class="nav-button" routerLink="/login" routerLinkActive="active">
+          Iniciar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>

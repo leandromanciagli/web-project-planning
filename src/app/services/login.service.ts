@@ -29,7 +29,6 @@ export class AuthService {
         return this.http.post<LoginResponse>(this.apiUrl, data).pipe(
             tap(response => {
                 this.setSession(response.token, response.user);
-                this._isLoggedIn.next(true);
             })
         );
     }
@@ -37,12 +36,14 @@ export class AuthService {
     logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        this._isLoggedIn.next(false);
+        this.router.navigate(['/login']);
     }
 
     setSession(token: string, user: any) {
-        localStorage.removeItem('token');
-        this._isLoggedIn.next(false);
-        this.router.navigate(['/login']);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        this._isLoggedIn.next(true);
     }
 
     getToken(): string | null {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../services/login.service';
+import { AuthService } from '@/services/login.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -31,12 +31,10 @@ export class LoginComponent implements OnInit {
     }
 
     onSubmit() {
-
         if (this.loginForm.valid) {
             this.authService.login(this.loginForm.value).subscribe({
                 next: (res) => {
-                    this.authService.setSession(res.token, res.user);
-                    this.router.navigate(['/project-form']); // ruta protegida
+                    this.router.navigate(['/app']);
                 },
                 error: (err) => {
                     console.error(err);

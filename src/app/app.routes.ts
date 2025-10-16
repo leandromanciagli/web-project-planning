@@ -1,13 +1,31 @@
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './auth/login/login.component';
-import { RegisterComponent } from './auth/register/register.component';
 import { NgModule } from '@angular/core';
+import { AuthGuard } from '@/guards/login.guard';
+import { RegisterComponent } from '@/components/auth/register/register.component';
+import { LoginComponent } from '@/components/auth/login/login.component';
+import { HomeComponent } from '@/components/app/home/home.component';
+import { ProjectFormComponent } from '@/components/projects/project-form/project-form.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  // Rutas públicas (navbar visible)
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'project-form', loadComponent: () => import('./project-form/project-form.component').then(m => m.ProjectFormComponent) }
+  
+  // Rutas protegidas (requieren autenticación)
+  {
+    path: 'app',
+    component: HomeComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: '', redirectTo: 'projects', pathMatch: 'full' },
+      { path: 'projects', component: ProjectFormComponent },
+      { path: 'create-project', component: ProjectFormComponent }
+    ]
+  },
+  
+  // Redirecciones
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' }
 ];
 
 @NgModule({

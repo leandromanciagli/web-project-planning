@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { CreateProjectRequest } from '../models/project-task.model';
-import { ProjectService } from '../services/project.service';
-import { OngService } from '../services/ong.service';
-import { TaskTypeService } from '../services/taskType.service';
+import { CreateProjectRequest } from '@/models/ProjectTask';
+import { ProjectService } from '@/services/project.service';
+import { OngService } from '@/services/ong.service';
+import { TaskTypeService } from '@/services/taskType.service';
 
 @Component({
   selector: 'app-project-form',
@@ -131,11 +131,11 @@ export class ProjectFormComponent implements OnInit {
     this.isLoading = true;
     this.ongService.getAll().subscribe(
       {
-        next: (data) => {
+        next: (data: any) => {
           this.ongs = data;          
           this.isLoading = false;
         },
-        error: (e) => {
+        error: (e: any) => {
           console.log(e);
           this.isLoading = false;
         }
@@ -147,11 +147,11 @@ export class ProjectFormComponent implements OnInit {
     this.isLoading = true;
     this.taskTypeService.getAll().subscribe(
       {
-        next: (data) => {          
+        next: (data: any) => {          
           this.taskTypes = data;
           this.isLoading = false;
         },
-        error: (e) => {
+        error: (e: any) => {
           console.log(e);
           this.isLoading = false;
         }
@@ -222,7 +222,7 @@ export class ProjectFormComponent implements OnInit {
 
       // Call the API
       this.projectService.createProject(apiProjectData).subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.isSubmitting = false;
           if (response.success) {
             // console.log('Proyecto creado exitosamente:', response.data);
@@ -233,7 +233,7 @@ export class ProjectFormComponent implements OnInit {
             alert(`Error: ${response.message || response.error}`);
           }
         },
-        error: (error) => {
+        error: (error: any) => {
           this.isSubmitting = false;
           console.error('Error al llamar al API:', error);
           alert(`Error de conexión: ${error.message || 'No se pudo conectar con el servidor'}\n\nVerifica que el backend esté funcionando en http://localhost:5001`);

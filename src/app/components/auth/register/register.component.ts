@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RegisterService } from '../../services/register.service';
+import { RegisterService } from '@/services/register.service';
 import { Router } from '@angular/router';
 
 export const passwordMatchValidator: ValidatorFn = (control: AbstractControl) => {
