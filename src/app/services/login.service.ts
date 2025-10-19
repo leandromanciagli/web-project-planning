@@ -28,6 +28,7 @@ export class AuthService {
     login(data: LoginRequest): Observable<LoginResponse> {
         return this.http.post<LoginResponse>(this.apiUrl, data).pipe(
             tap(response => {
+                localStorage.setItem('roles', JSON.stringify(response.user.roles));
                 this.setSession(response.token, response.user);
             })
         );
@@ -52,5 +53,9 @@ export class AuthService {
 
     isLoggedIn(): boolean {
         return !!this.getToken();
+    }
+
+    getRoles(): string[] {
+        return JSON.parse(localStorage.getItem('roles') || '[]');
     }
 }

@@ -34,7 +34,19 @@ export class LoginComponent implements OnInit {
         if (this.loginForm.valid) {
             this.authService.login(this.loginForm.value).subscribe({
                 next: (res) => {
-                    this.router.navigate(['/app']);
+                    const token = res.token;
+                    const roles = res.user.roles;
+
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('roles', JSON.stringify(roles))
+
+                    if (roles.includes('admin')) {
+                        this.router.navigate(['/admin-dashboard']);
+                    } else if (roles.includes('ong')) {
+                        this.router.navigate(['/create-project']);
+                    } else {
+                        this.router.navigate(['/project-tasks']);
+                    }
                 },
                 error: (err) => {
                     console.error(err);
