@@ -40,13 +40,7 @@ export class LoginComponent implements OnInit {
                     localStorage.setItem('token', token);
                     localStorage.setItem('roles', JSON.stringify(roles))
 
-                    if (roles.includes('admin')) {
-                        this.router.navigate(['/admin-dashboard']);
-                    } else if (roles.includes('ong')) {
-                        this.router.navigate(['/create-project']);
-                    } else {
-                        this.router.navigate(['/project-tasks']);
-                    }
+                    this.router.navigate(['/app']);
                 },
                 error: (err) => {
                     console.error(err);
