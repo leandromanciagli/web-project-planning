@@ -1,6 +1,7 @@
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { AuthGuard } from '@/guards/login.guard';
+import { OngGuard } from '@/guards/ong.guard';
 import { RegisterComponent } from '@/components/auth/register/register.component';
 import { LoginComponent } from '@/components/auth/login/login.component';
 import { HomeComponent } from '@/components/app/home/home.component';
@@ -11,7 +12,7 @@ export const routes: Routes = [
   // Rutas públicas (navbar visible)
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  
+
   // Rutas protegidas (requieren autenticación)
   {
     path: 'app',
@@ -20,10 +21,10 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'projects', pathMatch: 'full' },
       { path: 'projects', component: ProjectsListComponent },
-      { path: 'create-project', component: ProjectFormComponent }
+      { path: 'create-project', component: ProjectFormComponent, canActivate: [OngGuard] },
     ]
   },
-  
+
   // Redirecciones
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }

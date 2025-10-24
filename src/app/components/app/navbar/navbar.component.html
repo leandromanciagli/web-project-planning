@@ -11,7 +11,8 @@
         <button class="nav-button" routerLink="/app/projects" routerLinkActive="active">
           Proyectos
         </button>
-        <button class="nav-button" routerLink="/app/create-project" routerLinkActive="active">
+        <button *ngIf="authService.hasRole('ong')" class="nav-button" routerLink="/app/create-project"
+          routerLinkActive="active">
           Crear Proyecto
         </button>
         <button class="nav-button" (click)="logout()">
