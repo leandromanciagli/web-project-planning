@@ -1,27 +1,26 @@
-<nav class="navbar">
-  <div class="navbar-container">
-    <div class="navbar-brand">
-      <h1>Sistema de Planificación de Proyectos de Financiamiento</h1>
+<nav class="bg-slate-900 border-b border-slate-800">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="text-slate-200 font-semibold text-lg">
+        Sistema de Planificación de Proyectos de Financiamiento
+      </div>
     </div>
 
     <!-- Menú de navegación -->
-    <div class="navbar-menu">
+    <div class="flex items-center gap-2">
       <!-- Opciones para usuarios logueados -->
-      <div *ngIf="isLoggedIn" class="nav-section">
-        <button class="nav-button" routerLink="/app/projects" routerLinkActive="active">
-          Proyectos
+      <div *ngIf="isLoggedIn" class="flex items-center gap-2">
+        <button class="px-3 py-1.5 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 transition" routerLink="/app/projects" routerLinkActive="!bg-slate-700">
+          Mis Proyectos
         </button>
-        <button class="nav-button" routerLink="/app/create-project" routerLinkActive="active">
-          Crear Proyecto
-        </button>
-        <button class="nav-button" (click)="logout()">
+        <button class="px-3 py-1.5 rounded-md bg-rose-600 text-white hover:bg-rose-500 transition" (click)="logout()">
           Cerrar sesión
         </button>
       </div>
 
       <!-- Opciones para usuarios no logueados -->
-      <div *ngIf="!isLoggedIn && currentRoute === '/register'" class="nav-section">
-        <button class="nav-button" routerLink="/login" routerLinkActive="active">
+      <div *ngIf="!isLoggedIn && currentRoute === '/register'" class="flex items-center">
+        <button class="px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition" routerLink="/login" routerLinkActive="!bg-indigo-700">
           Iniciar sesión
         </button>
       </div>

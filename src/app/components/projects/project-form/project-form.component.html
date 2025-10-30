@@ -1,72 +1,72 @@
-<div class="project-form-container">
-  <div class="form-header">
-    <h1>Nuevo Proyecto</h1>
-    <p>Complete la información del proyecto y sus etapas de trabajo</p>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-slate-950 rounded-xl border border-slate-800 text-slate-200">
+  <div class="text-center mb-6 pb-4 border-b border-slate-800">
+    <h1 class="text-3xl font-semibold text-slate-100 m-0">Nuevo Proyecto</h1>
+    <p class="text-slate-400 mt-2">Complete la información del proyecto y sus etapas de trabajo</p>
   </div>
 
   <!-- Loader -->
-  <div *ngIf="isLoading" class="loader-container">
-    <div class="loader">
-      <div class="spinner"></div>
-      <p>Cargando...</p>
+  <div *ngIf="isLoading" class="flex items-center justify-center min-h-[200px] py-8">
+    <div class="text-center text-slate-400">
+      <div class="w-10 h-10 border-4 border-slate-700 border-t-indigo-500 rounded-full animate-spin mx-auto mb-3"></div>
+      <p class="m-0">Cargando...</p>
     </div>
   </div>
 
   <!-- Formulario -->
-  <form *ngIf="!isLoading" [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="project-form">
+  <form *ngIf="!isLoading" [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
     <!-- Información del Proyecto -->
-    <div class="form-section">
-      <h2>Información del Proyecto</h2>
+    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800">
+      <h2 class="text-xl font-semibold text-slate-100 mb-4">Información del Proyecto</h2>
 
-      <div class="form-group mb-1">
-        <label for="ong" class="form-label">ONG Originante *</label>
-        <select class="form-control" id="ong" formControlName="ong">
+      <div class="mb-4 flex flex-col gap-2">
+        <label for="ong" class="text-slate-300 font-medium">ONG Originante *</label>
+        <select class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600" id="ong" formControlName="ong">
           <option value="">Seleccione una ONG</option>
           <option *ngFor="let ong of ongs" [value]="ong.id">{{ ong.organizationName }}</option>
         </select>
-        <div class="error-message" *ngIf="isFieldInvalid('ong')">
+        <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('ong')">
           {{ getFieldError('ong') }}
         </div>
       </div>
 
-      <div class="form-group mb-1">
-        <label for="name">Nombre del Proyecto *</label>
+      <div class="mb-4 flex flex-col gap-2">
+        <label for="name" class="text-slate-300 font-medium">Nombre del Proyecto *</label>
         <input 
           type="text" 
           id="name" 
           formControlName="name" 
-          class="form-control"
+          class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           [class.error]="isFieldInvalid('name')"
           placeholder="Ingrese el nombre del proyecto">
-        <div class="error-message" *ngIf="isFieldInvalid('name')">
+        <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('name')">
           {{ getFieldError('name') }}
         </div>
       </div>
 
-      <div class="form-group mb-1">
-        <label for="description">Descripción del Proyecto *</label>
-        <textarea id="description" formControlName="description" class="form-control"
-          [class.error]="isFieldInvalid('description')" rows="4" placeholder="Describa brevemente el proyecto"></textarea>
-        <div class="error-message" *ngIf="isFieldInvalid('description')">
+      <div class="mb-4 flex flex-col gap-2">
+        <label for="description" class="text-slate-300 font-medium">Descripción del Proyecto *</label>
+        <textarea id="description" formControlName="description" class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+          [class.error]="isFieldInvalid('description')" rows="4" placeholder="Describa los detalles del proyecto"></textarea>
+        <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('description')">
           {{ getFieldError('description') }}
         </div>
       </div>
 
-      <div class="form-row-two">
-        <div class="form-group mb-1">
-          <label for="startDate">Fecha de Inicio del Proyecto *</label>
-          <input type="date" id="startDate" formControlName="startDate" class="form-control"
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="mb-1 flex flex-col gap-2">
+          <label for="startDate" class="text-slate-300 font-medium">Fecha de Inicio del Proyecto *</label>
+          <input type="date" id="startDate" formControlName="startDate" class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
             [class.error]="isFieldInvalid('startDate')" [min]="getTodayDate()">
-          <div class="error-message" *ngIf="isFieldInvalid('startDate')">
+          <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('startDate')">
             {{ getFieldError('startDate') }}
           </div>
         </div>
         
-        <div class="form-group mb-1">
-          <label for="endDate">Fecha de Fin del Proyecto *</label>
-          <input type="date" id="endDate" formControlName="endDate" class="form-control"
+        <div class="mb-1 flex flex-col gap-2">
+          <label for="endDate" class="text-slate-300 font-medium">Fecha de Fin del Proyecto *</label>
+          <input type="date" id="endDate" formControlName="endDate" class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
             [class.error]="isFieldInvalid('endDate')" [min]="getMinEndDate()">
-          <div class="error-message" *ngIf="isFieldInvalid('endDate')">
+          <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('endDate')">
             {{ getFieldError('endDate') }}
           </div>
         </div>
@@ -75,118 +75,116 @@
     </div>
 
     <!-- Tareas del Proyecto -->
-    <div class="form-section">
-      <div class="section-header">
-        <h2>Tareas del Proyecto</h2>
+    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-slate-100">Tareas del Proyecto</h2>
       </div>
 
-      <div class="tasks-container" formArrayName="tasks">
+      <div class="flex flex-col gap-4" formArrayName="tasks">
         <div 
           *ngFor="let task of tasks.controls; let i = index" 
           [formGroupName]="i" 
-          class="task-card">
+          class="rounded-lg border border-slate-700 bg-slate-800 p-4 shadow">
           
-          <div class="task-header" (click)="toggleTaskCollapse(i)">
-            <div class="task-title-section">
-              <div class="btn-collapse">
-                <span class="collapse-icon" [class.collapsed]="isTaskCollapsed(i)">▼</span>
-              </div>
-              <h3>Tarea {{ i + 1 }}</h3>
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-700 hover:bg-slate-700/20 rounded-md -mx-2 px-2 cursor-pointer" (click)="toggleTaskCollapse(i)">
+            <div class="flex items-center gap-2">
+              <span class="inline-block text-xs transition-transform" [class.rotate-90]="isTaskCollapsed(i)">▼</span>
+              <h3 class="m-0 text-slate-100 text-lg font-medium">Tarea {{ i + 1 }}</h3>
             </div>
             <button 
               type="button" 
-              class="btn-remove-task" 
+              class="px-4 py-2 rounded-md bg-rose-600 text-white hover:bg-rose-500 transition text-base"
               (click)="removeTask(i); $event.stopPropagation()"
               [disabled]="tasks.length === 1">
               Eliminar
             </button>
           </div>
 
-          <div class="task-content" [class.collapsed]="isTaskCollapsed(i)">
-            <div class="form-group">
-              <label [for]="'title-tarea-' + i">Título de la Tarea *</label>
-              <div class="title-with-checkbox">
+          <div class="flex flex-col gap-4 overflow-hidden transition-all" [class.max-h-0]="isTaskCollapsed(i)" [class.opacity-0]="isTaskCollapsed(i)" [class.max-h-[1000px]]="!isTaskCollapsed(i)" [class.opacity-100]="!isTaskCollapsed(i)">
+            <div class="flex flex-col gap-2">
+              <label [for]="'title-tarea-' + i" class="text-slate-300 font-medium">Título de la Tarea *</label>
+              <div class="flex flex-row items-center gap-4">
                 <input 
                   type="text" 
                   [id]="'title-tarea-' + i"
                   formControlName="title" 
-                  class="form-control title-input"
+                  class="flex-1 min-w-0 rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   [class.error]="isFieldInvalid('title', i)"
                   placeholder="Ingrese el título de la tarea">
-                <div class="checkbox-container">
+                <div class="flex items-center gap-3 px-4 py-2 rounded-md bg-slate-900 border border-slate-700">
                   <input 
                     type="checkbox" 
                     [id]="'coverage-' + i"
                     formControlName="isCoverageRequest"
-                    class="coverage-checkbox">
-                  <label [for]="'coverage-' + i" class="checkbox-label">
+                    class="w-5 h-5 accent-emerald-600 border-2 border-slate-500 rounded">
+                  <label [for]="'coverage-' + i" class="text-slate-300 font-medium m-0 select-none">
                     Publicar como pedido de cobertura
                   </label>
                 </div>
               </div>
-              <div class="error-message" *ngIf="isFieldInvalid('title', i)">
+              <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('title', i)">
                 {{ getFieldError('title', i) }}
               </div>
             </div>
 
-            <div class="form-group">
-              <label [for]="'description-tarea-' + i">Descripción de la Tarea *</label>
+            <div class="flex flex-col gap-2">
+              <label [for]="'description-tarea-' + i" class="text-slate-300 font-medium">Descripción de la Tarea *</label>
               <textarea 
                 [id]="'description-tarea-' + i"
                 formControlName="description" 
-                class="form-control"
+                class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                 [class.error]="isFieldInvalid('description', i)"
                 rows="4"
                 placeholder="Describa los detalles de la tarea"></textarea>
-              <div class="error-message" *ngIf="isFieldInvalid('description', i)">
+              <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('description', i)">
                 {{ getFieldError('description', i) }}
               </div>
             </div>
             
-            <div class="form-row-four">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-              <div class="form-group">
-                <label [for]="'taskType-' + i">Tipo de Tarea *</label>
-                <select [id]="'taskType-' + i" formControlName="taskTypeId" class="form-control"
+              <div class="flex flex-col gap-2">
+                <label [for]="'taskType-' + i" class="text-slate-300 font-medium">Tipo de Tarea *</label>
+                <select [id]="'taskType-' + i" formControlName="taskTypeId" class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   [class.error]="isFieldInvalid('taskTypeId', i)">
                   <option value="">Seleccione un tipo de tarea</option>
                   <option *ngFor="let type of taskTypes" [value]="type.id">{{ type.title }}</option>
                 </select>
-                <div class="error-message" *ngIf="isFieldInvalid('taskTypeId', i)">
+                <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('taskTypeId', i)">
                   {{ getFieldError('taskTypeId', i) }}
                 </div>
               </div>
 
-              <div class="form-group">
-                <label [for]="'priority-' + i">Prioridad *</label>
-                <select [id]="'priority-' + i" formControlName="priority" class="form-control"
+              <div class="flex flex-col gap-2">
+                <label [for]="'priority-' + i" class="text-slate-300 font-medium">Prioridad *</label>
+                <select [id]="'priority-' + i" formControlName="priority" class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   [class.error]="isFieldInvalid('priority', i)">
                   <option value="low">Baja</option>
                   <option value="medium">Media</option>
                   <option value="high">Alta</option>
                   <option value="critical">Crítica</option>
                 </select>
-                <div class="error-message" *ngIf="isFieldInvalid('priority', i)">
+                <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('priority', i)">
                   {{ getFieldError('priority', i) }}
                 </div>
               </div>
               
-              <div class="form-group">
-                <label [for]="'dueDate-' + i">Fecha de Vencimiento *</label>
-                <input type="date" [id]="'dueDate-' + i" formControlName="dueDate" class="form-control"
+              <div class="flex flex-col gap-2">
+                <label [for]="'dueDate-' + i" class="text-slate-300 font-medium">Fecha de Vencimiento *</label>
+                <input type="date" [id]="'dueDate-' + i" formControlName="dueDate" class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   [class.error]="isFieldInvalid('dueDate', i)" 
                   [min]="getMinTaskDueDate()" 
                   [max]="getMaxTaskDueDate()">
-                <div class="error-message" *ngIf="isFieldInvalid('dueDate', i)">
+                <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('dueDate', i)">
                   {{ getFieldError('dueDate', i) }}
                 </div>
               </div>
               
-              <div class="form-group">
-                <label [for]="'estimatedHours-' + i">Horas Estimadas *</label>
-                <input type="number" [id]="'estimatedHours-' + i" formControlName="estimatedHours" class="form-control"
+              <div class="flex flex-col gap-2">
+                <label [for]="'estimatedHours-' + i" class="text-slate-300 font-medium">Horas Estimadas *</label>
+                <input type="number" [id]="'estimatedHours-' + i" formControlName="estimatedHours" class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   [class.error]="isFieldInvalid('estimatedHours', i)" min="1" placeholder="Ej: 120">
-                <div class="error-message" *ngIf="isFieldInvalid('estimatedHours', i)">
+                <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('estimatedHours', i)">
                   {{ getFieldError('estimatedHours', i) }}
                 </div>
               </div>
@@ -195,20 +193,20 @@
           </div>
         </div>
       </div>
-      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
-        <button type="button" class="btn-add-task" (click)="addTask()" [disabled]="projectForm.invalid">
-          <span class="icon">+</span>
+      <div class="flex justify-end mt-6">
+        <button type="button" class="px-4 py-2 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 bg-[#059669] hover:bg-[#059669]/90 text-base" (click)="addTask()" [disabled]="projectForm.invalid">
+          <span class="text-lg leading-none">+</span>
           Agregar Tarea
         </button>
       </div>
     </div>
 
     <!-- Botones de Acción -->
-    <div class="form-actions">
-      <button type="button" class="btn-secondary" (click)="resetForm()" [disabled]="isSubmitting">
+    <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row gap-3 justify-center">
+      <button type="button" class="px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 transition disabled:opacity-60 disabled:cursor-not-allowed text-base" (click)="resetForm()" [disabled]="isSubmitting">
         Limpiar Formulario
       </button>
-      <button type="submit" class="btn-primary" [disabled]="projectForm.invalid || isSubmitting">
+      <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition disabled:opacity-60 disabled:cursor-not-allowed text-base" [disabled]="projectForm.invalid || isSubmitting">
         <span *ngIf="isSubmitting">Enviando...</span>
         <span *ngIf="!isSubmitting">Crear Proyecto</span>
       </button>
