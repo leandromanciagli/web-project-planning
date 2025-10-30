@@ -1,7 +1,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
   <div class="flex items-center justify-between py-6">
-    <h2 class="text-xl font-semibold text-slate-200">Mis Proyectos</h2>
-    <button class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition cursor-pointer" routerLink="/app/create-project" routerLinkActive="!bg-indigo-700">
+    <h2 class="text-xl font-semibold text-slate-200">{{ title }}</h2>
+    <button *ngIf="canCreateProyect" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition cursor-pointer" routerLink="/app/create-project" routerLinkActive="!bg-indigo-700">
       Crear Proyecto
     </button>
   </div>
@@ -14,6 +14,7 @@
           <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Estado</th>
           <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Fecha Inicio</th>
           <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Fecha Fin</th>
+          <th *ngIf="canExecuteProyect" class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Acciones</th>
           
         </tr>
       </thead>
@@ -27,21 +28,29 @@
             <td class="px-4 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">
               <span class="inline-flex items-center px-2.5 py-1.5 rounded-full font-medium"
                     [ngClass]="{
-                      'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30 text-sm': getStatusClass(project.status) === 'status-completed',
-                      'bg-yellow-500/10 text-yellow-400 ring-1 ring-inset ring-yellow-500/30 text-sm': getStatusClass(project.status) === 'status-progress',
-                      'bg-slate-500/10 text-slate-300 ring-1 ring-inset ring-slate-500/30 text-sm': getStatusClass(project.status) === 'status-planned'
+                      'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 text-sm': getStatusClass(project.status) === 'status-generated',
+                      'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30 text-sm': getStatusClass(project.status) === 'status-planned',
+                      'bg-orange-500/10 text-orange-400 ring-1 ring-inset ring-orange-500/30 text-sm': getStatusClass(project.status) === 'status-executing',
+                      'bg-slate-500/10 text-slate-300 ring-1 ring-inset ring-slate-500/30 text-sm': getStatusClass(project.status) === 'status-completed'
                     }">
                 {{ project.status }}
               </span>
             </td>
             <td class="px-4 text-slate-300 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">{{ project.startDate }}</td>
             <td class="px-4 text-slate-300 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">{{ project.endDate }}</td>
-            
+            <td *ngIf="canExecuteProyect" class="px-4 text-center" [ngClass]="{ 'py-5': expanded[project.id], 'py-3': !expanded[project.id] }">
+              <button type="button"
+                      class="cursor-pointer px-3 py-1.5 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed text-sm bg-[#059669] hover:bg-[#059669]/90"
+                      [disabled]="project.status !== 'Planificado'"
+                      (click)="executeProject(project); $event.stopPropagation()">
+                Ejecutar
+              </button>
+            </td>
           </tr>
           
           <!-- Fila colapsable de tareas con animación -->
           <tr>
-            <td colspan="4" class="bg-slate-950">
+          <td [attr.colspan]="canExecuteProyect ? 5 : 4" class="bg-slate-950">
               <div class="overflow-hidden transition-all duration-300 ease-out" [attr.id]="'project-collapse-' + project.id"
                   [style.maxHeight]="expanded[project.id] ? '1000px' : '0px'"
                   [style.opacity]="expanded[project.id] ? 1 : 0">
@@ -63,11 +72,14 @@
                   <div class="mt-3 flex items-center justify-between">
                     <div class="text-xs text-slate-400">Asignado a: {{ task.assignedTo }}</div>
                     <div class="flex items-center gap-2">
-                      <button type="button" (click)="openCollabModal(task, project, $event)" class="cursor-pointer px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition whitespace-nowrap text-sm">
+                      <button *ngIf="canViewCollaborations" type="button" (click)="openCollabModal(task, project, $event)" class="cursor-pointer px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition whitespace-nowrap text-sm">
                         Ver colaboraciones
                       </button>
-                      <button type="button" (click)="openCommitModal(task, project, $event)" class="cursor-pointer px-3 py-1.5 rounded-md text-white transition whitespace-nowrap text-sm bg-[#059669] hover:bg-[#059669]/90">
+                      <button *ngIf="canCollaborate" type="button" (click)="openCommitModal(task, project, $event)" class="cursor-pointer px-3 py-1.5 rounded-md text-white transition whitespace-nowrap text-sm bg-[#059669] hover:bg-[#059669]/90">
                         Colaborar
+                      </button>
+                      <button *ngIf="canCompleteCommitment" type="button" (click)="markCommitmentCompleted(task, $event)" class="cursor-pointer px-3 py-1.5 rounded-md bg-[#059669] text-slate-200 hover:bg-[#059669]/70 transition whitespace-nowrap text-sm">
+                        Marcar compromiso como cumplido
                       </button>
                     </div>
                   </div>

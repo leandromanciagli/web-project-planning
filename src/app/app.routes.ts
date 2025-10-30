@@ -5,7 +5,9 @@ import { RegisterComponent } from '@/components/auth/register/register.component
 import { LoginComponent } from '@/components/auth/login/login.component';
 import { HomeComponent } from '@/components/app/home/home.component';
 import { ProjectFormComponent } from '@/components/projects/project-form/project-form.component';
-import { ProjectsListComponent } from '@/components/projects/projects-list/projects-list.component';
+import { MyProjectsComponent } from '@/views/my-projects/my-projects.component';
+import { CollaborationsComponent } from '@/views/collaborations/collaborations.component';
+import { MonitoringComponent } from '@/views/monitoring/monitoring.component';
 
 export const routes: Routes = [
   
@@ -20,8 +22,10 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'projects', pathMatch: 'full' },
-      { path: 'projects', component: ProjectsListComponent },
-      { path: 'create-project', component: ProjectFormComponent }
+      { path: 'my-projects', component: MyProjectsComponent },
+      { path: 'collaborations', component: CollaborationsComponent },
+      { path: 'monitoring', component: MonitoringComponent },
+      { path: 'my-projects/create-project', component: ProjectFormComponent }
     ]
   },
   

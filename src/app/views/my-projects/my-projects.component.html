@@ -1,0 +1,23 @@
+<div class="flex flex-col gap-10">
+    <!-- MIS PROYECTOS EN EJECUCIÓN -->
+    <app-projects-list 
+        title="Mis Proyectos en Ejecución"
+        [projects]="projectsInExecution" 
+        [canCreateProyect]="false"
+        [canCollaborate]="false"
+        [canViewCollaborations]="false"
+        [canExecuteProyect]="false"
+        [canCompleteCommitment]="false">
+    </app-projects-list>
+
+    <!-- MIS PROYECTOS -->
+    <app-projects-list 
+        title="Mis Proyectos"
+        [projects]="otherProjects" 
+        [canCreateProyect]="true"
+        [canCollaborate]="false"
+        [canViewCollaborations]="true"
+        [canExecuteProyect]="true"
+        [canCompleteCommitment]="false">
+    </app-projects-list>
+</div>

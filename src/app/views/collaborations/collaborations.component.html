@@ -1,0 +1,23 @@
+<div class="flex flex-col gap-10">
+    <!-- PROYECTOS EN EJECUCIÓN EN LOS QUE COLABORO -->
+    <app-projects-list 
+        title="Proyectos en Ejecución en los que Colaboro"
+        [projects]="projectsInExecution" 
+        [canCreateProyect]="false"
+        [canCollaborate]="false"
+        [canViewCollaborations]="false"
+        [canExecuteProyect]="false"
+        [canCompleteCommitment]="true">
+    </app-projects-list>
+
+    <!-- PROYECTOS CON PEDIDOS DE COLABORACIÓN PENDIENTES -->
+    <app-projects-list 
+        title="Proyectos con Pedidos de Colaboración Pendientes"
+        [projects]="otherProjects" 
+        [canCreateProyect]="false"
+        [canCollaborate]="true"
+        [canViewCollaborations]="false"
+        [canExecuteProyect]="false"
+        [canCompleteCommitment]="false">
+    </app-projects-list>
+</div>

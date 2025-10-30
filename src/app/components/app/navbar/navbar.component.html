@@ -10,10 +10,22 @@
     <div class="flex items-center gap-2">
       <!-- Opciones para usuarios logueados -->
       <div *ngIf="isLoggedIn" class="flex items-center gap-2">
-        <button class="px-3 py-1.5 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 transition" routerLink="/app/projects" routerLinkActive="!bg-slate-700">
+        <button 
+          class="cursor-pointer px-3 py-1.5 rounded-md text-white transition bg-indigo-600" 
+          routerLink="/app/my-projects">
           Mis Proyectos
         </button>
-        <button class="px-3 py-1.5 rounded-md bg-rose-600 text-white hover:bg-rose-500 transition" (click)="logout()">
+        <button 
+          class="cursor-pointer px-3 py-1.5 rounded-md text-white transition bg-[#059669]"
+          routerLink="/app/collaborations">
+          Colaborar
+        </button>
+        <button 
+          class="cursor-pointer px-3 py-1.5 rounded-md text-white transition bg-orange-500" 
+          routerLink="/app/monitoring">
+          Monitoreo y Seguimiento
+        </button>
+        <button class="cursor-pointer px-3 py-1.5 rounded-md bg-rose-600 text-white hover:bg-rose-500 transition ml-25" (click)="logout()">
           Cerrar sesión
         </button>
       </div>

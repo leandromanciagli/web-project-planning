@@ -21,6 +21,7 @@
     "paths": {
       "@/*": ["app/*"],
       "@/components/*": ["app/components/*"],
+      "@/views/*": ["app/views/*"],
       "@/services/*": ["app/services/*"],
       "@/models/*": ["app/models/*"],
       "@/guards/*": ["app/guards/*"],
