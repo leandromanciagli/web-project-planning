@@ -31,6 +31,12 @@ interface Task {
   taskType: { id: number; title: string };
 }
 
+interface Collaboration {
+  id: number;
+  ongName: string;
+  description: string;
+}
+
 @Component({
   selector: 'app-projects-list',
   standalone: true,
@@ -342,6 +348,10 @@ export class ProjectsListComponent {
   selectedTask: Task | null = null;
   commitDescription: string = '';
   selectedProjectName: string = '';
+  // Colaboraciones
+  showCollabModal = false;
+  collaborations: Collaboration[] = [];
+  selectedCollaborationId: number | null = null;
 
   toggleExpand(project: Project) {
     const isOpen = !!this.expanded[project.id];
@@ -388,6 +398,39 @@ export class ProjectsListComponent {
     this.selectedTask = null;
     this.commitDescription = '';
     this.selectedProjectName = '';
+  }
+
+  openCollabModal(task: Task, project: Project, event?: Event) {
+    if (event) { event.stopPropagation(); }
+    this.selectedTask = task;
+    this.selectedProjectName = project.name;
+    // Mock de colaboraciones de ejemplo (reemplazar con fetch a API)
+    this.collaborations = [
+      { id: 101, ongName: 'ONG Verde Futuro', description: 'Aporte mensual por 3 meses para consumibles.' },
+      { id: 102, ongName: 'Fundación Ayuda Social', description: 'Donación única de materiales necesarios.' },
+      { id: 103, ongName: 'Tech Volunteers', description: 'Horas de trabajo voluntario para instalación.' }
+    ];
+    this.selectedCollaborationId = null;
+    this.showCollabModal = true;
+  }
+
+  closeCollabModal() {
+    this.showCollabModal = false;
+    this.selectedTask = null;
+    this.selectedProjectName = '';
+    this.collaborations = [];
+    this.selectedCollaborationId = null;
+  }
+
+  submitSelectedCollaboration() {
+    if (!this.selectedTask || this.selectedCollaborationId == null) { return; }
+    const payload = {
+      taskId: this.selectedTask.id,
+      collaborationId: this.selectedCollaborationId
+    };
+    // TODO: Enviar selección de colaboración a la API
+    // this.http.post('/api/v1/commitments/select', payload).subscribe(...)
+    this.closeCollabModal();
   }
 
   submitCommit() {
