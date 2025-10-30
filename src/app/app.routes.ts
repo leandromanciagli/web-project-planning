@@ -8,7 +8,8 @@ import { ProjectFormComponent } from '@/components/projects/project-form/project
 import { ProjectsListComponent } from '@/components/projects/projects-list/projects-list.component';
 
 export const routes: Routes = [
-  // Rutas públicas (navbar visible)
+  
+  // Rutas públicas
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   

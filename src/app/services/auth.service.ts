@@ -18,7 +18,7 @@ export interface LoginResponse {
     providedIn: 'root'
 })
 export class AuthService {
-    private apiUrl = 'http://localhost:5001/api/v1/users/login';
+    private apiUrl = 'http://localhost:5001/api/v1/auth/login';
     private _isLoggedIn = new BehaviorSubject<boolean>(!!localStorage.getItem('token'));
     isLoggedIn$ = this._isLoggedIn.asObservable();
 
@@ -28,8 +28,9 @@ export class AuthService {
     login(data: LoginRequest): Observable<LoginResponse> {
         return this.http.post<LoginResponse>(this.apiUrl, data).pipe(
             tap(response => {
-                localStorage.setItem('roles', JSON.stringify(response.user.roles));
-                this.setSession(response.token, response.user);
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('user', JSON.stringify(response.user));
+                this._isLoggedIn.next(true);
             })
         );
     }
@@ -39,12 +40,6 @@ export class AuthService {
         localStorage.removeItem('user');
         this._isLoggedIn.next(false);
         this.router.navigate(['/login']);
-    }
-
-    setSession(token: string, user: any) {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-        this._isLoggedIn.next(true);
     }
 
     getToken(): string | null {

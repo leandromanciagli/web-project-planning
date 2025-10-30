@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '@/services/login.service';
+import { AuthService } from '@/services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
 
 
 @Component({
@@ -33,13 +32,7 @@ export class LoginComponent implements OnInit {
     onSubmit() {
         if (this.loginForm.valid) {
             this.authService.login(this.loginForm.value).subscribe({
-                next: (res) => {
-                    const token = res.token;
-                    const roles = res.user.roles;
-
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('roles', JSON.stringify(roles))
-
+                next: () => {
                     this.router.navigate(['/app']);
                 },
                 error: (err) => {

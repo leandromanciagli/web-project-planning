@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from '@/components/app/navbar/navbar.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from '@/services/login.service';
+import { AuthService } from '@/services/auth.service';
 
 @Component({
   selector: 'app-root',
