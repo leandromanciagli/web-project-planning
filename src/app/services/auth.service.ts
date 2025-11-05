@@ -9,11 +9,6 @@ export interface LoginRequest {
     password: string;
 }
 
-export interface LoginResponse {
-    token: string;
-    user: any;
-}
-
 @Injectable({
     providedIn: 'root'
 })
@@ -25,11 +20,11 @@ export class AuthService {
 
     constructor(private http: HttpClient, private router: Router) { }
 
-    login(data: LoginRequest): Observable<LoginResponse> {
-        return this.http.post<LoginResponse>(this.apiUrl, data).pipe(
-            tap(response => {
-                localStorage.setItem('token', response.token);
-                localStorage.setItem('user', JSON.stringify(response.user));
+    login(data: LoginRequest): Observable<any> {
+        return this.http.post<any>(this.apiUrl, data).pipe(
+            tap(response => {                
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
                 this._isLoggedIn.next(true);
             })
         );
@@ -42,6 +37,10 @@ export class AuthService {
         this.router.navigate(['/login']);
     }
 
+    getUser(): any | null {
+        return JSON.parse(localStorage.getItem('user') || '{}');
+    }
+
     getToken(): string | null {
         return localStorage.getItem('token');
     }
@@ -50,7 +49,42 @@ export class AuthService {
         return !!this.getToken();
     }
 
-    getRoles(): string[] {
-        return JSON.parse(localStorage.getItem('roles') || '[]');
+    hasRole(roleId: string): boolean {
+        return this.getUser().roles.some((role: any) => { return role.id === roleId });
     }
+
+    /**
+     * Obtiene la primera sección disponible según los roles del usuario
+     * Basado en las secciones de la navbar
+     * @returns string - Ruta de la primera sección disponible
+     */
+    getFirstAvailableSection(): string {
+        const user = this.getUser();
+        if (!user || !user.roles || !Array.isArray(user.roles)) {
+            return 'my-projects'; // fallback
+        }
+
+        const userRoleIds = user.roles.map((role: any) => role.id);
+
+        // Definir las secciones en orden de prioridad
+        const sections = [
+            { route: 'my-projects', availableRoles: ['ONG_PRINCIPAL'] },
+            { route: 'collaborations', availableRoles: ['ONG_COLABORADORA'] },
+            { route: 'monitoring', availableRoles: ['ONG_GERENCIAL'] }
+        ];
+
+        // Encontrar la primera sección cuyo rol esté disponible para el usuario
+        for (const section of sections) {
+            const hasRequiredRole = section.availableRoles.some(roleId => 
+                userRoleIds.includes(roleId)
+            );
+            if (hasRequiredRole) {
+                return section.route;
+            }
+        }
+
+        // Si no encuentra ninguna, retornar la primera por defecto
+        return 'my-projects';
+    }
+
 }

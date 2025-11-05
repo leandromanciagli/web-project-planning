@@ -1,6 +1,8 @@
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { AuthGuard } from '@/guards/login.guard';
+import { NoAuthGuard } from '@/guards/no-auth.guard';
+import { FirstSectionGuard } from '@/guards/first-section.guard';
 import { RegisterComponent } from '@/components/auth/register/register.component';
 import { LoginComponent } from '@/components/auth/login/login.component';
 import { HomeComponent } from '@/components/app/home/home.component';
@@ -11,9 +13,9 @@ import { MonitoringComponent } from '@/views/monitoring/monitoring.component';
 
 export const routes: Routes = [
   
-  // Rutas públicas
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  // Rutas públicas (solo accesibles si NO hay sesión)
+  { path: 'login', component: LoginComponent, canActivate: [NoAuthGuard] },
+  { path: 'register', component: RegisterComponent, canActivate: [NoAuthGuard] },
   
   // Rutas protegidas (requieren autenticación)
   {
@@ -21,7 +23,7 @@ export const routes: Routes = [
     component: HomeComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: '', redirectTo: 'projects', pathMatch: 'full' },
+      { path: '', canActivate: [FirstSectionGuard], children: [] },
       { path: 'my-projects', component: MyProjectsComponent },
       { path: 'collaborations', component: CollaborationsComponent },
       { path: 'monitoring', component: MonitoringComponent },

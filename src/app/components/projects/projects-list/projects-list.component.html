@@ -1,7 +1,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
   <div class="flex items-center justify-between py-6">
     <h2 class="text-xl font-semibold text-slate-200">{{ title }}</h2>
-    <button *ngIf="canCreateProyect" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition cursor-pointer" routerLink="/app/create-project" routerLinkActive="!bg-indigo-700">
+    <button *ngIf="canCreateProyect" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition cursor-pointer" routerLink="/app/my-projects/create-project" routerLinkActive="!bg-indigo-700">
       Crear Proyecto
     </button>
   </div>
@@ -115,11 +115,11 @@
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <div class="tracking-wide text-slate-400">Tipo de tarea</div>
-          <div class="mt-1 text-slate-300 italic">{{ t.taskType?.title || 'N/A' }}</div>
+          <div class="mt-1 text-slate-300 italic">{{ t.taskType.title || 'N/A' }}</div>
         </div>
         <div>
           <div class="tracking-wide text-slate-400">Horas estimadas</div>
-          <div class="mt-1 text-slate-300 italic">{{ t.estimatedHours ?? 'N/A' }}hs</div>
+          <div class="mt-1 text-slate-300 italic">{{ t.estimatedHours || 'N/A' }}hs</div>
         </div>
         <div>
           <div class="tracking-wide text-slate-400">Fecha límite</div>
@@ -146,7 +146,7 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" *ngIf="showCollabModal" (click)="closeCollabModal()">
   <div class="w-full max-w-2xl rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl" (click)="$event.stopPropagation()">
     <div class="flex items-start justify-between gap-4">
-      <h3 class="text-lg font-semibold text-slate-200">Colaboraciones para: {{ selectedTask?.title }}</h3>
+      <h3 class="text-lg font-semibold text-slate-200">Colaboraciones para: {{ selectedTask ? selectedTask.title : '' }}</h3>
       <button class="text-slate-400 hover:text-slate-200" (click)="closeCollabModal()">✕</button>
     </div>
 

@@ -33,7 +33,8 @@ export class LoginComponent implements OnInit {
         if (this.loginForm.valid) {
             this.authService.login(this.loginForm.value).subscribe({
                 next: () => {
-                    this.router.navigate(['/app']);
+                    const firstSection = this.authService.getFirstAvailableSection();
+                    this.router.navigate(['/app', firstSection]);
                 },
                 error: (err) => {
                     console.error(err);

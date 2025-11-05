@@ -1,12 +1,22 @@
 export interface CreateUserRequest {
+    id?: number;
     username: string;
-    email: string;
     password: string;
     organizationName: string;
-    description?: string;
-    website?: string;
-    phone: string;
-    role: 'admin' | 'ong' | 'collaborator';
+    roles: string[];
+}
+
+export interface Role {
+    id: string;
+    name: string;
+}
+
+export interface User {
+    id?: number;
+    username: string;
+    password?: string;
+    organizationName: string;
+    roles: Role[];
 }
 
 export interface ApiResponse<T> {

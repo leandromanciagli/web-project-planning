@@ -5,6 +5,7 @@ import { CreateProjectRequest } from '@/models/ProjectTask';
 import { ProjectService } from '@/services/project.service';
 import { OngService } from '@/services/ong.service';
 import { TaskTypeService } from '@/services/taskType.service';
+import { AuthService } from '@/services/auth.service';
 
 @Component({
   selector: 'app-project-form',
@@ -92,11 +93,12 @@ export class ProjectFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private projectService: ProjectService,
-    private ongService: OngService,
-    private taskTypeService: TaskTypeService
+    // private ongService: OngService,
+    private taskTypeService: TaskTypeService,
+    private authService: AuthService
   ) {
     this.projectForm = this.fb.group({
-      ong: ['', Validators.required],
+      ong: [this.authService.getUser()?.id, Validators.required],
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       startDate: ['', [Validators.required, this.startDateValidator.bind(this)]],
@@ -106,7 +108,7 @@ export class ProjectFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadOngs();
+    // this.loadOngs();
     this.loadTaskTypes();    
     this.addTask();
     
@@ -127,21 +129,21 @@ export class ProjectFormComponent implements OnInit {
     });
   }
 
-  loadOngs() {
-    this.isLoading = true;
-    this.ongService.getAll().subscribe(
-      {
-        next: (data: any) => {
-          this.ongs = data;          
-          this.isLoading = false;
-        },
-        error: (e: any) => {
-          console.log(e);
-          this.isLoading = false;
-        }
-      }
-    );
-  }
+  // loadOngs() {
+  //   this.isLoading = true;
+  //   this.ongService.getAll().subscribe(
+  //     {
+  //       next: (data: any) => {
+  //         this.ongs = data;          
+  //         this.isLoading = false;
+  //       },
+  //       error: (e: any) => {
+  //         console.log(e);
+  //         this.isLoading = false;
+  //       }
+  //     }
+  //   );
+  // }
 
   loadTaskTypes() {
     this.isLoading = true;

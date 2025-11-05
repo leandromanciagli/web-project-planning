@@ -10,25 +10,6 @@
             </small>
         </div>
 
-        <!-- Email -->
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" formControlName="email" class="form-input">
-            <small *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.hasError('email')"
-                class="error">
-                Formato de email inválido
-            </small>
-        </div>
-
-        <!-- Teléfono -->
-        <div class="form-group">
-            <label>Teléfono</label>
-            <input type="text" formControlName="phone" class="form-input">
-            <small *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid" class="error">
-                Debe contener entre 7 y 15 números
-            </small>
-        </div>
-
         <!-- Nombre de la organización -->
         <div class="form-group">
             <label>Nombre de la organización</label>
@@ -40,36 +21,26 @@
             </small>
         </div>
 
-        <!-- Descripción -->
+        <!-- Roles -->
         <div class="form-group">
-            <label>Descripción</label>
-            <textarea formControlName="description" rows="3" class="form-input"></textarea>
-            <small *ngIf="registerForm.get('description')?.touched && registerForm.get('description')?.invalid"
-                class="error">
-                La descripción es obligatoria
+            <label>Roles (puede seleccionar múltiples)</label>
+            <div *ngIf="loadingRoles" class="text-sm text-gray-500">Cargando roles...</div>
+            <div *ngIf="!loadingRoles" class="roles-container">
+                <div *ngFor="let role of availableRoles; let i = index" class="role-checkbox">
+                    <label class="checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            [formControl]="getRoleControl(i)"
+                            class="checkbox-input">
+                        <span>{{ role.name }}</span>
+                    </label>
+                </div>
+            </div>
+            <small *ngIf="registerForm.get('roles')?.touched && registerForm.get('roles')?.hasError('minRoles')" class="error">
+                Debe seleccionar al menos un rol
             </small>
-        </div>
-
-        <!-- Sitio web -->
-        <div class="form-group">
-            <label>Sitio web</label>
-            <input type="text" formControlName="website" class="form-input">
-            <small *ngIf="registerForm.get('website')?.errors?.['invalidUrl'] && registerForm.get('website')?.touched"
-                class="error">
-                Ingrese una URL válida (ej: https://example.com)
-            </small>
-        </div>
-
-        <!-- Rol -->
-        <div class="form-group">
-            <label>Rol</label>
-            <select formControlName="role" class="form-input">
-                <option value="admin">Administrador</option>
-                <option value="ong">ONG</option>
-                <option value="collaborator">Colaborador</option>
-            </select>
-            <small *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.invalid" class="error">
-                Debe seleccionar un rol
+            <small *ngIf="registerForm.get('roles')?.touched && registerForm.get('roles')?.invalid && !registerForm.get('roles')?.hasError('minRoles')" class="error">
+                Debe seleccionar al menos un rol
             </small>
         </div>
 
@@ -77,10 +48,26 @@
         <div class="form-group">
             <label>Contraseña</label>
             <input type="password" formControlName="password" class="form-input">
-            <small *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.hasError('minlength')"
-                class="error">
-                La contraseña debe tener al menos 6 caracteres
-            </small>
+            <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="error-messages">
+                <small *ngIf="registerForm.get('password')?.hasError('required')" class="error">
+                    La contraseña es obligatoria
+                </small>
+                <small *ngIf="registerForm.get('password')?.hasError('minlength')" class="error">
+                    La contraseña debe tener al menos 8 caracteres
+                </small>
+                <small *ngIf="registerForm.get('password')?.hasError('passwordLowercase')" class="error">
+                    La contraseña debe contener al menos una letra minúscula
+                </small>
+                <small *ngIf="registerForm.get('password')?.hasError('passwordUppercase')" class="error">
+                    La contraseña debe contener al menos una letra mayúscula
+                </small>
+                <small *ngIf="registerForm.get('password')?.hasError('passwordNumber')" class="error">
+                    La contraseña debe contener al menos un número
+                </small>
+                <small *ngIf="registerForm.get('password')?.hasError('passwordSpecial')" class="error">
+                    La contraseña debe contener al menos un carácter especial
+                </small>
+            </div>
         </div>
 
         <!-- Confirmar contraseña -->
