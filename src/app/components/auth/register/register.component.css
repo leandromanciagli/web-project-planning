@@ -1,5 +1,5 @@
 .register-container {
-    max-width: 500px;
+    max-width: 600px;
     margin: 50px auto;
     padding: 30px 25px;
     background: #0f172a;
@@ -67,14 +67,12 @@ label {
 
 .roles-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 12px;
     margin-top: 8px;
-}
-
-.role-checkbox {
-    display: flex;
-    align-items: center;
 }
 
 .checkbox-label {

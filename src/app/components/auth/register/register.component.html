@@ -1,15 +1,6 @@
 <div class="register-container">
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-        <!-- Nombre de usuario -->
-        <div class="form-group">
-            <label>Nombre de usuario</label>
-            <input type="text" formControlName="username" class="form-input">
-            <small *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid" class="error">
-                El nombre de usuario es obligatorio
-            </small>
-        </div>
-
         <!-- Nombre de la organización -->
         <div class="form-group">
             <label>Nombre de la organización</label>
@@ -26,21 +17,28 @@
             <label>Roles (puede seleccionar múltiples)</label>
             <div *ngIf="loadingRoles" class="text-sm text-gray-500">Cargando roles...</div>
             <div *ngIf="!loadingRoles" class="roles-container">
-                <div *ngFor="let role of availableRoles; let i = index" class="role-checkbox">
-                    <label class="checkbox-label">
-                        <input 
-                            type="checkbox" 
-                            [formControl]="getRoleControl(i)"
-                            class="checkbox-input">
-                        <span>{{ role.displayName }}</span>
-                    </label>
-                </div>
+                <label *ngFor="let role of availableRoles; let i = index" class="checkbox-label">
+                    <input 
+                        type="checkbox" 
+                        [formControl]="getRoleControl(i)"
+                        class="checkbox-input">
+                    <span>{{ role.displayName }}</span>
+                </label>
             </div>
             <small *ngIf="registerForm.get('roles')?.touched && registerForm.get('roles')?.hasError('minRoles')" class="error">
                 Debe seleccionar al menos un rol
             </small>
             <small *ngIf="registerForm.get('roles')?.touched && registerForm.get('roles')?.invalid && !registerForm.get('roles')?.hasError('minRoles')" class="error">
                 Debe seleccionar al menos un rol
+            </small>
+        </div>
+
+        <!-- Nombre de usuario -->
+        <div class="form-group">
+            <label>Nombre de usuario</label>
+            <input type="text" formControlName="username" class="form-input">
+            <small *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid" class="error">
+                El nombre de usuario es obligatorio
             </small>
         </div>
 
