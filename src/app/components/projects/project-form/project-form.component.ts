@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { CreateProjectRequest } from '@/models/ProjectTask';
+import { CreateProjectRequest } from '@/models/project-task.model';
 import { ProjectService } from '@/services/project.service';
 import { OngService } from '@/services/ong.service';
 import { TaskTypeService } from '@/services/taskType.service';

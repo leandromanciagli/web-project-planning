@@ -2,18 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { Role, ApiResponse } from '@/models/role.model';
 
-export interface Role {
-  id: string;
-  name: string;
-}
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class RoleService {
@@ -22,7 +13,7 @@ export class RoleService {
   constructor(private http: HttpClient) { }
 
   getRoles(): Observable<Role[]> {
-    return this.http.get<ApiResponse<Role[]>>(this.apiUrl).pipe(
+    return this.http.get<ApiResponse<Role[]>>(`${this.apiUrl}/all`).pipe(
       map(response => response.data || [])
     );
   }

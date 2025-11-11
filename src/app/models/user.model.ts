@@ -1,15 +1,4 @@
-export interface CreateUserRequest {
-    id?: number;
-    username: string;
-    password: string;
-    organizationName: string;
-    roles: string[];
-}
-
-export interface Role {
-    id: string;
-    name: string;
-}
+import { Role } from "./role.model";
 
 export interface User {
     id?: number;
@@ -17,6 +6,14 @@ export interface User {
     password?: string;
     organizationName: string;
     roles: Role[];
+}
+
+export interface CreateUserRequest {
+    id?: number;
+    username: string;
+    password: string;
+    organizationName: string;
+    roles: string[];
 }
 
 export interface ApiResponse<T> {

@@ -14,7 +14,7 @@
           <button 
             *ngIf="authService.hasRole(section.availableRoles[0])"
             class="cursor-pointer px-3 py-1.5 rounded-md text-white transition {{section.color}}" 
-            routerLink="/app/{{section.route}}">
+            routerLink="/app{{section.route}}">
             {{section.name}}
           </button>
         }
@@ -25,7 +25,7 @@
 
       <!-- Opciones para usuarios no logueados -->
       <div *ngIf="!isLoggedIn && currentRoute === '/register'" class="flex items-center">
-        <button class="px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition" routerLink="/login" routerLinkActive="!bg-indigo-700">
+        <button class="cursor-pointer px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition" routerLink="/login" routerLinkActive="!bg-indigo-700">
           Iniciar sesión
         </button>
       </div>

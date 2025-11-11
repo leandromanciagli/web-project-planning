@@ -6,11 +6,11 @@ import { AuthService } from '@/services/auth.service';
     providedIn: 'root'
 })
 export class NoAuthGuard implements CanActivate {
-    constructor(private auth: AuthService, private router: Router) { }
+    constructor(private authService: AuthService, private router: Router) { }
 
     canActivate(): boolean {
-        if (this.auth.isLoggedIn()) {
-            const firstSection = this.auth.getFirstAvailableSection();
+        if (this.authService.isLoggedIn()) {
+            const firstSection = this.authService.getFirstAvailableSection();
             this.router.navigate(['/app', firstSection]);
             return false;
         }

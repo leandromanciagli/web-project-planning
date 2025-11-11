@@ -7,12 +7,12 @@ import { AuthService } from '@/services/auth.service';
 })
 export class FirstSectionGuard implements CanActivate {
     constructor(
-        private auth: AuthService,
+        private authService: AuthService,
         private router: Router
     ) { }
 
     canActivate(route: ActivatedRouteSnapshot): boolean {
-        const firstSection = this.auth.getFirstAvailableSection();
+        const firstSection = this.authService.getFirstAvailableSection();
         this.router.navigate(['/app', firstSection], { replaceUrl: true });
         return false;
     }

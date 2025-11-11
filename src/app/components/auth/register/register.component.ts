@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ReactiveFormsModule, ValidatorFn, ValidationErrors, FormArray, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RegisterService } from '@/services/register.service';
-import { RoleService, Role } from '@/services/role.service';
+import { RoleService } from '@/services/role.service';
+import { Role } from '@/models/role.model';
 import { Router } from '@angular/router';
 
 
@@ -98,7 +99,7 @@ export class RegisterComponent implements OnInit {
         const selectedRoles: string[] = [];
         this.rolesFormArray.controls.forEach((control, index) => {
             if (control.value) {
-                selectedRoles.push(this.availableRoles[index].id);
+                selectedRoles.push(this.availableRoles[index].name);
             }
         });
         return selectedRoles;
