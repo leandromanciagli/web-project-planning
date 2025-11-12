@@ -3,7 +3,6 @@ import { FormArray, FormBuilder, FormGroup, Validators, ReactiveFormsModule, Abs
 import { CommonModule } from '@angular/common';
 import { CreateProjectRequest } from '@/models/project-task.model';
 import { ProjectService } from '@/services/project.service';
-import { OngService } from '@/services/ong.service';
 import { TaskTypeService } from '@/services/taskType.service';
 import { AuthService } from '@/services/auth.service';
 
@@ -20,7 +19,6 @@ export class ProjectFormComponent implements OnInit {
   collapsedTasks: boolean[] = [];
   isSubmitting = false;
   isLoading = true;
-  ongs: any[] = [];
   taskTypes: any[] = [];
 
   // Custom validator for start date
@@ -93,7 +91,6 @@ export class ProjectFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private projectService: ProjectService,
-    // private ongService: OngService,
     private taskTypeService: TaskTypeService,
     private authService: AuthService
   ) {
@@ -108,7 +105,6 @@ export class ProjectFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.loadOngs();
     this.loadTaskTypes();    
     this.addTask();
     
@@ -128,22 +124,6 @@ export class ProjectFormComponent implements OnInit {
       });
     });
   }
-
-  // loadOngs() {
-  //   this.isLoading = true;
-  //   this.ongService.getAll().subscribe(
-  //     {
-  //       next: (data: any) => {
-  //         this.ongs = data;          
-  //         this.isLoading = false;
-  //       },
-  //       error: (e: any) => {
-  //         console.log(e);
-  //         this.isLoading = false;
-  //       }
-  //     }
-  //   );
-  // }
 
   loadTaskTypes() {
     this.isLoading = true;
