@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjectsListComponent } from '@/components/projects/projects-list/projects-list.component';
 import { ProjectService } from '@/services/project.service';
@@ -9,7 +9,7 @@ import { ProjectService } from '@/services/project.service';
   templateUrl: './collaborations.component.html',
   styleUrl: './collaborations.component.css'
 })
-export class CollaborationsComponent {
+export class CollaborationsComponent implements OnInit {
   projectsInExecution: any[] = [];
   otherProjects: any[] = [];
 
@@ -21,18 +21,16 @@ export class CollaborationsComponent {
   }
 
   getRunningProjects(): void {
-    this.projectService.getProjects(['En Ejecución']).subscribe(res => {
-      if ((res as any).success) {
-        this.projectsInExecution = (res as any).data || [];
-      }
+    // Para colaboraciones, no filtrar por ownerId (mostrar proyectos en los que colabora)
+    this.projectService.getProjects({ status: ['EN_EJECUCION'] }).subscribe(res => {
+      this.projectsInExecution = res.data || [];
     });
   }
 
   getOtherProjects(): void {
-    this.projectService.getProjects(['Generado']).subscribe(res => {
-      if ((res as any).success) {
-        this.otherProjects = (res as any).data || [];
-      }
+    // Para colaboraciones, no filtrar por ownerId (mostrar proyectos en los que colabora)
+    this.projectService.getProjects({ status: ['GENERADO'] }).subscribe(res => {
+      this.otherProjects = res.data || [];
     });
   }
 

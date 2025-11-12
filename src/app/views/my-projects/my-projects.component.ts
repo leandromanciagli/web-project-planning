@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ProjectsListComponent } from '@/components/projects/projects-list/projects-list.component';
 import { ProjectService } from '@/services/project.service';
+import { AuthService } from '@/services/auth.service';
 
 @Component({
   selector: 'app-my-projects',
@@ -13,7 +14,10 @@ export class MyProjectsComponent implements OnInit {
   projectsInExecution: any[] = [];
   otherProjects: any[] = [];
 
-  constructor(private projectService: ProjectService) { }
+  constructor(
+    private projectService: ProjectService,
+    private authService: AuthService
+  ) { }
 
   ngOnInit(): void {
     this.getRunningProjects();
@@ -21,18 +25,18 @@ export class MyProjectsComponent implements OnInit {
   }
 
   getRunningProjects(): void {
-    this.projectService.getProjects(['En Ejecución']).subscribe(res => {
-      if ((res as any).success) {
-        this.projectsInExecution = (res as any).data || [];
-      }
+    const user = this.authService.getUser();
+    const userId = user?.id;
+    this.projectService.getProjects({ status: ['EN_EJECUCION'], createdBy: userId }).subscribe(res => {
+      this.projectsInExecution = res.data || [];
     });
   }
 
   getOtherProjects(): void {
-    this.projectService.getProjects(['Generado', 'Planificado', 'Completado']).subscribe(res => {
-      if ((res as any).success) {
-        this.otherProjects = (res as any).data || [];
-      }
-    });
+    const user = this.authService.getUser();
+    const userId = user?.id;
+    this.projectService.getProjects({ status: ['GENERADO', 'PLANIFICADO', 'COMPLETADO'], createdBy: userId }).subscribe(res => {
+        this.otherProjects = res.data || [];
+    });    
   }
 }
