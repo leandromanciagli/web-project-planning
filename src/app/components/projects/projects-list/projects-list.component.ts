@@ -2,7 +2,8 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-
+import { TaskService } from '@/services/task.service';
+import { formatDate as formatDateHelper } from '@/helpers/date.helper';
 interface Project {
   id: number;
   name: string;
@@ -47,21 +48,39 @@ interface Collaboration {
 export class ProjectsListComponent {
   @Input() projects: Project[] = [];
   @Input() title: string = 'Listado de Proyectos';
+  @Input() emptyStateMessage: string = 'No hay proyectos disponibles';
   @Input() canCreateProyect: boolean = false;
   @Input() canCollaborate: boolean = false;
   @Input() canViewCollaborations: boolean = false;
   @Input() canExecuteProyect: boolean = false;
   @Input() canCompleteCommitment: boolean = false;
 
+  // Helper function para formatear fechas
+  formatDate = formatDateHelper;
+
   expanded: Record<number, boolean> = {};
   showCommitModal = false;
   selectedTask: Task | null = null;
   commitDescription: string = '';
   selectedProjectName: string = '';
+  
   // Colaboraciones
   showCollabModal = false;
   collaborations: Collaboration[] = [];
   selectedCollaborationId: number | null = null;
+
+  tasks: Task[] = [];
+
+  constructor(private taskService: TaskService) {}
+
+  getTasks(project: Project) {
+    this.toggleExpand(project);
+    if (this.expanded[project.id]) {
+      this.taskService.getLocalTasksByProject(project.id).subscribe(res => {
+        this.tasks = res.data || [];
+      });
+    }
+  }
 
   toggleExpand(project: Project) {
     const isOpen = !!this.expanded[project.id];

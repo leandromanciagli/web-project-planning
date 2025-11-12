@@ -3,6 +3,7 @@
     <app-projects-list 
         title="Mis Proyectos en Ejecución"
         [projects]="projectsInExecution" 
+        emptyStateMessage="Actualmente no tienes proyectos en estado de ejecución. Los proyectos aparecerán aquí una vez que los ejecutes."
         [canCreateProyect]="false"
         [canCollaborate]="false"
         [canViewCollaborations]="false"
@@ -14,6 +15,7 @@
     <app-projects-list 
         title="Mis Proyectos"
         [projects]="otherProjects" 
+        emptyStateMessage="No tienes proyectos creados aún. Comienza creando tu primer proyecto."
         [canCreateProyect]="true"
         [canCollaborate]="false"
         [canViewCollaborations]="true"

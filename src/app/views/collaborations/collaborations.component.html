@@ -3,6 +3,7 @@
     <app-projects-list 
         title="Proyectos en Ejecución en los que Colaboro"
         [projects]="projectsInExecution" 
+        emptyStateMessage="No tienes proyectos en ejecución donde estés colaborando actualmente. Los proyectos aparecerán aquí cuando te asignen tareas en proyectos en ejecución."
         [canCreateProyect]="false"
         [canCollaborate]="false"
         [canViewCollaborations]="false"
@@ -14,6 +15,7 @@
     <app-projects-list 
         title="Proyectos con Pedidos de Colaboración Pendientes"
         [projects]="otherProjects" 
+        emptyStateMessage="No hay proyectos con pedidos de colaboración pendientes en este momento. Los proyectos que requieran tu colaboración aparecerán aquí."
         [canCreateProyect]="false"
         [canCollaborate]="true"
         [canViewCollaborations]="false"
