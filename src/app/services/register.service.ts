@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { CreateUserRequest, ApiResponse } from '@/models/user.model';
+import { CreateUserRequest } from '@/models/user.model';
+import { ApiResponse } from '@/models/rest.model';
 
 @Injectable({ providedIn: 'root' })
 export class RegisterService {
-    private apiUrl = 'http://localhost:5001/api/v1/users/';
+    private apiUrl = 'http://localhost:5001/api/v1/users';
 
     private readonly httpOptions = {
         headers: new HttpHeaders({

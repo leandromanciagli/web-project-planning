@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Role, ApiResponse } from '@/models/role.model';
+import { Role } from '@/models/role.model';
+import { ApiResponse } from '@/models/rest.model';
 
 
 

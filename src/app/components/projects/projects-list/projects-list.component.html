@@ -152,8 +152,8 @@
     </div>
 
     <div class="mt-5 flex items-center justify-end gap-2">
-      <button type="button" class="px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700" (click)="closeCommitModal()">Cancelar</button>
-      <button type="button" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500" (click)="submitCommit()">Confirmar</button>
+      <button type="button" class="cursor-pointer px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700" (click)="closeCommitModal()">Cancelar</button>
+      <button type="button" class="cursor-pointer px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500" (click)="submitCommitment()">Confirmar</button>
     </div>
   </div>
 </div>
@@ -184,8 +184,8 @@
     </ng-template>
 
     <div class="mt-5 flex items-center justify-end gap-2">
-      <button type="button" class="px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700" (click)="closeCollabModal()">Cancelar</button>
-      <button type="button" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
+      <button type="button" class="cursor-pointer px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700" (click)="closeCollabModal()">Cancelar</button>
+      <button type="button" class="cursor-pointer px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed"
               [disabled]="selectedCollaborationId == null"
               (click)="submitSelectedCollaboration()">Confirmar</button>
     </div>

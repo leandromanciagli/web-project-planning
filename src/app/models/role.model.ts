@@ -3,10 +3,3 @@ export interface Role {
     name: string;
     displayName: string;
 }
-
-export interface ApiResponse<T> {
-    success: boolean;
-    data?: T;
-    message?: string;
-    error?: string;
-}

@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
-import { CreateProjectRequest, ApiResponse } from '@/models/project-task.model';
+import { CreateProjectRequest } from '@/models/project-task.model';
+import { ApiResponse } from '@/models/rest.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
-  private readonly apiUrl = 'http://localhost:5001/api/v1/projects/';
+  private readonly apiUrl = 'http://localhost:5001/api/v1/projects';
   
   private readonly httpOptions = {
     headers: new HttpHeaders({
@@ -23,7 +24,7 @@ export class ProjectService {
    * @returns Observable with the list of projects
    */
   getProjects(filter: any): Observable<ApiResponse<any[]>> {
-    return this.http.post<any>(this.apiUrl + 'filter', filter, this.httpOptions)
+    return this.http.post<any>(`${this.apiUrl}/filter`, filter, this.httpOptions)
       .pipe(
         map(response => {
           return {
@@ -50,7 +51,7 @@ export class ProjectService {
    * @returns Observable with the API response
    */
   createProject(projectData: CreateProjectRequest): Observable<ApiResponse<any>> {
-    return this.http.post<any>(this.apiUrl, projectData, this.httpOptions)
+    return this.http.post<any>(`${this.apiUrl}`, projectData, this.httpOptions)
       .pipe(
         map(response => ({
           success: true,

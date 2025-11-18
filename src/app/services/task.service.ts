@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, of } from 'rxjs';
-import { CreateProjectRequest, ApiResponse } from '@/models/project-task.model';
+import { CreateProjectRequest } from '@/models/project-task.model';
+import { ApiResponse } from '@/models/rest.model';
 
 @Injectable({
   providedIn: 'root'

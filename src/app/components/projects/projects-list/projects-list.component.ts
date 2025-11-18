@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { TaskService } from '@/services/task.service';
 import { formatDate as formatDateHelper } from '@/helpers/date.helper';
 import { AuthService } from '@/services/auth.service';
+import { CommitmentService } from '@/services/commitment.service';
 
 
 interface Project {
@@ -35,11 +36,6 @@ interface Task {
   taskType: { id: number; title: string };
 }
 
-interface Collaboration {
-  id: number;
-  ongName: string;
-  description: string;
-}
 
 @Component({
   selector: 'app-projects-list',
@@ -69,12 +65,16 @@ export class ProjectsListComponent {
   
   // Colaboraciones
   showCollabModal = false;
-  collaborations: Collaboration[] = [];
+  collaborations: any[] = [];
   selectedCollaborationId: number | null = null;
 
   tasks: Task[] = [];
 
-  constructor(private taskService: TaskService, private authService: AuthService) {}
+  constructor(
+    private taskService: TaskService, 
+    private authService: AuthService, 
+    private commitmentService: CommitmentService
+  ) {}
 
   getTasks(project: Project) {
     this.toggleExpand(project);
@@ -145,12 +145,9 @@ export class ProjectsListComponent {
     if (event) { event.stopPropagation(); }
     this.selectedTask = task;
     this.selectedProjectName = project.name;
-    // Mock de colaboraciones de ejemplo (reemplazar con fetch a API)
-    this.collaborations = [
-      { id: 101, ongName: 'ONG Verde Futuro', description: 'Aporte mensual por 3 meses para consumibles.' },
-      { id: 102, ongName: 'Fundación Ayuda Social', description: 'Donación única de materiales necesarios.' },
-      { id: 103, ongName: 'Tech Volunteers', description: 'Horas de trabajo voluntario para instalación.' }
-    ];
+    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
+      this.collaborations = commitments || [];
+    });
     this.selectedCollaborationId = null;
     this.showCollabModal = true;
   }
@@ -171,31 +168,21 @@ export class ProjectsListComponent {
     };
     // TODO: Enviar selección de colaboración a la API
     // this.http.post('/api/v1/commitments/select', payload).subscribe(...)
-    this.closeCollabModal();
+    this.closeCollabModal();  
   }
 
-  submitCommit() {
+  submitCommitment() {
     if (!this.selectedTask) { return; }
-    const userRaw = localStorage.getItem('user');
-    const user = userRaw ? JSON.parse(userRaw) : null;
-    const ongId = user?.id ?? null;
-    const payload = {
+    const commitment = {
       taskId: this.selectedTask.id,
-      ongId: ongId,
+      ongId: this.authService.getUser()?.id,
       description: this.commitDescription
     };
-
-    // TODO: Enviar al servicio de compromisos
-    // this.http.post('/api/v1/commitments', payload).subscribe(...)
-
+    
+    this.commitmentService.createCommitment(commitment).subscribe(commitment => {
+      console.log(commitment);
+    });
     this.closeCommitModal();
-  }
-
-  executeProject(project: Project) {
-    if (project.status !== 'Planificado') { return; }
-    // TODO: Llamar API para ejecutar proyecto
-    // this.http.post(`/api/v1/projects/${project.id}/execute`, {}).subscribe(...)
-    console.log('Ejecutar proyecto:', project.id);
   }
 
   markCommitmentCompleted(task: Task, event?: Event) {
@@ -204,5 +191,12 @@ export class ProjectsListComponent {
     // TODO: Llamar API para marcar compromiso como realizado
     // this.http.post('/api/v1/commitments/complete', payload).subscribe(...)
     console.log('Marcar compromiso como realizado:', payload);
+  }
+
+  executeProject(project: Project) {
+    if (project.status !== 'Planificado') { return; }
+    // TODO: Llamar API para ejecutar proyecto
+    // this.http.post(`/api/v1/projects/${project.id}/execute`, {}).subscribe(...)
+    console.log('Ejecutar proyecto:', project.id);
   }
 }
