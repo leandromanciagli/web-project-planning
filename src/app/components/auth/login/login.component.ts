@@ -38,7 +38,7 @@ export class LoginComponent implements OnInit {
                 },
                 error: (err) => {
                     console.error(err);
-                    this.errorMessage = err.error?.message || 'Usuario o contraseña incorrectos';
+                    this.errorMessage = 'Usuario o contraseña incorrectos';
                 }
             });
         } else {

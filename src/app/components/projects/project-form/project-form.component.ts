@@ -5,6 +5,7 @@ import { CreateProjectRequest } from '@/models/project-task.model';
 import { ProjectService } from '@/services/project.service';
 import { TaskTypeService } from '@/services/taskType.service';
 import { AuthService } from '@/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-form',
@@ -21,13 +22,16 @@ export class ProjectFormComponent implements OnInit {
   isLoading = true;
   taskTypes: any[] = [];
 
-  // Custom validator for start date
   private startDateValidator(control: AbstractControl): ValidationErrors | null {
     if (!control.value) {
-      return null; // Let required validator handle empty values
+      return null;
     }
     
-    const selectedDate = new Date(control.value);
+    const selectedDateStr = control.value;
+    const [year, month, day] = selectedDateStr.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
+    selectedDate.setHours(0, 0, 0, 0);
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
     
@@ -44,14 +48,21 @@ export class ProjectFormComponent implements OnInit {
       return null; // Let required validator handle empty values
     }
     
-    const endDate = new Date(control.value);
     const startDate = this.projectForm.get('startDate')?.value;
     
     if (!startDate) {
       return null; // Can't validate if start date is not set yet
     }
     
-    const startDateObj = new Date(startDate);
+    // Parse date strings and create date objects in local timezone
+    const endDateStr = control.value;
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    const endDate = new Date(endYear, endMonth - 1, endDay);
+    endDate.setHours(0, 0, 0, 0);
+    
+    const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+    const startDateObj = new Date(startYear, startMonth - 1, startDay);
+    startDateObj.setHours(0, 0, 0, 0);
     
     if (endDate < startDateObj) {
       return { endDateBeforeStart: true };
@@ -73,9 +84,19 @@ export class ProjectFormComponent implements OnInit {
       return null; // Can't validate if project dates are not set yet
     }
 
-    const dueDate = new Date(control.value);
-    const startDateObj = new Date(projectStartDate);
-    const endDateObj = new Date(projectEndDate);
+    // Parse date strings and create date objects in local timezone
+    const dueDateStr = control.value;
+    const [dueYear, dueMonth, dueDay] = dueDateStr.split('-').map(Number);
+    const dueDate = new Date(dueYear, dueMonth - 1, dueDay);
+    dueDate.setHours(0, 0, 0, 0);
+    
+    const [startYear, startMonth, startDay] = projectStartDate.split('-').map(Number);
+    const startDateObj = new Date(startYear, startMonth - 1, startDay);
+    startDateObj.setHours(0, 0, 0, 0);
+    
+    const [endYear, endMonth, endDay] = projectEndDate.split('-').map(Number);
+    const endDateObj = new Date(endYear, endMonth - 1, endDay);
+    endDateObj.setHours(0, 0, 0, 0);
 
     if (dueDate < startDateObj) {
       return { dueDateBeforeProjectStart: true };
@@ -92,7 +113,8 @@ export class ProjectFormComponent implements OnInit {
     private fb: FormBuilder,
     private projectService: ProjectService,
     private taskTypeService: TaskTypeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.projectForm = this.fb.group({
       ong: [this.authService.getUser()?.id, Validators.required],
@@ -210,6 +232,7 @@ export class ProjectFormComponent implements OnInit {
             // console.log('Proyecto creado exitosamente:', response.data);
             alert(response.message);
             this.resetForm();
+            this.router.navigate(['/app/my-projects']);
           } else {
             // console.error('Error en la respuesta:', response.error);
             alert(`Error: ${response.message || response.error}`);

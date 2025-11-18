@@ -7,7 +7,7 @@ import { CreateProjectRequest, ApiResponse } from '@/models/project-task.model';
   providedIn: 'root'
 })
 export class TaskService {
-  private readonly apiUrl = 'http://localhost:5001/api/v1/';
+  private readonly apiUrl = 'http://localhost:5001/api/v1';
   
   private readonly httpOptions = {
     headers: new HttpHeaders({
@@ -18,15 +18,41 @@ export class TaskService {
   constructor(private http: HttpClient) { }
 
   /**
-   * Gets tasks by project ID
+   * Get tasks by project ID
+   * @param projectId The project ID
+   * @returns Observable with the list of tasks
+   */
+  getTasksByProject(projectId: number): Observable<ApiResponse<any[]>> {
+    return this.http.post<any>(`${this.apiUrl}/projects/${projectId}/tasks`, { username: 'walter.bates', password: 'bpm' }, this.httpOptions)
+      .pipe(
+        map(response => {
+          return {
+            success: true,
+            data: response.data || [],
+            message: 'Tareas obtenidas exitosamente'
+          };
+        }),
+        catchError(error => {
+          console.error('Error getting tasks:', error);
+          const errorMessage = error.error?.message || error.message || 'Error desconocido al obtener las tareas';
+          return [{
+            success: false,
+            error: errorMessage,
+            message: 'Error al obtener las tareas'
+          }];
+        })
+      );
+  }
+
+  /**
+   * Get tasks by project ID
    * @param projectId The project ID
    * @returns Observable with the list of tasks
    */
   getCloudTasksByProject(projectId: number): Observable<ApiResponse<any[]>> {
-    return this.http.get<any>(`${this.apiUrl}cloud-tasks/${projectId}`, this.httpOptions)
+    return this.http.post<any>(`${this.apiUrl}/cloud-tasks/extension/getCloudTasksByProject`, { projectId: projectId, username: 'walter.bates', password: 'bpm' }, this.httpOptions)
       .pipe(
         map(response => {
-          console.log(response);
           return {
             success: true,
             data: response.data || [],
@@ -51,10 +77,9 @@ export class TaskService {
    * @returns Observable with the list of tasks
    */
   getLocalTasksByProject(projectId: number): Observable<ApiResponse<any[]>> {
-    return this.http.get<any>(`${this.apiUrl}tasks/local/${projectId}`, this.httpOptions)
+    return this.http.get<any>(`${this.apiUrl}/tasks/local/${projectId}`, this.httpOptions)
       .pipe(
         map(response => {
-          console.log(response);
           return {
             success: true,
             data: response.data || [],

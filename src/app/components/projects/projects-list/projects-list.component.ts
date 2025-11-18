@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TaskService } from '@/services/task.service';
 import { formatDate as formatDateHelper } from '@/helpers/date.helper';
+import { AuthService } from '@/services/auth.service';
+
+
 interface Project {
   id: number;
   name: string;
@@ -71,14 +74,21 @@ export class ProjectsListComponent {
 
   tasks: Task[] = [];
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService, private authService: AuthService) {}
 
   getTasks(project: Project) {
     this.toggleExpand(project);
     if (this.expanded[project.id]) {
-      this.taskService.getLocalTasksByProject(project.id).subscribe(res => {
-        this.tasks = res.data || [];
-      });
+      if (this.authService.hasRole('ONG_PRINCIPAL')) {
+        this.taskService.getTasksByProject(project.id).subscribe(res => {
+          this.tasks = res.data || [];
+        });
+      }
+      if (this.authService.hasRole('ONG_COLABORADORA')) {
+        this.taskService.getCloudTasksByProject(project.id).subscribe(res => {
+          this.tasks = res.data || [];
+        });
+      }
     }
   }
 
