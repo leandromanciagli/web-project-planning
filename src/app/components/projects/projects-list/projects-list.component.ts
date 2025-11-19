@@ -63,7 +63,7 @@ export class ProjectsListComponent {
   commitDescription: string = '';
   selectedProjectName: string = '';
   
-  // Colaboraciones
+  // Solicitudes de compromiso
   showCollabModal = false;
   collaborations: any[] = [];
   selectedCollaborationId: number | null = null;
@@ -167,17 +167,6 @@ export class ProjectsListComponent {
     this.loadingCollaborations = false;
   }
 
-  submitSelectedCollaboration() {
-    if (!this.selectedTask || this.selectedCollaborationId == null) { return; }
-    const payload = {
-      taskId: this.selectedTask.id,
-      collaborationId: this.selectedCollaborationId
-    };
-    // TODO: Enviar selección de colaboración a la API
-    // this.http.post('/api/v1/commitments/select', payload).subscribe(...)
-    this.closeCollabModal();  
-  }
-
   submitCommitment() {
     if (!this.selectedTask || !this.commitDescription.trim()) { return; }
     this.loadingCommitment = true;
@@ -190,6 +179,15 @@ export class ProjectsListComponent {
     this.commitmentService.createCommitment(commitment).subscribe(commitment => {
       this.loadingCommitment = false;
       this.closeCommitModal();
+    });
+  }
+
+  submitSelectedCollaboration() {
+    if (!this.selectedTask || this.selectedCollaborationId == null) { return; }
+    this.commitmentService.assignCommitment(this.selectedTask.id, this.selectedCollaborationId).subscribe(res => {
+      console.log('Solicitud de compromiso asignada:', res);
+      this.loadingCommitment = false;
+      this.closeCollabModal();
     });
   }
 
