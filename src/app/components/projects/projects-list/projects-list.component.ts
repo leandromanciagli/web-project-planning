@@ -46,7 +46,7 @@ interface Task {
 })
 export class ProjectsListComponent {
   @Input() projects: Project[] = [];
-  @Input() title: string = 'Listado de Proyectos';
+  @Input() tableTitle: string = 'Listado de Proyectos';
   @Input() emptyStateMessage: string = 'No hay proyectos disponibles';
   @Input() canCreateProyect: boolean = false;
   @Input() canCollaborate: boolean = false;

@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-10">
     <!-- MIS PROYECTOS EN EJECUCIÓN -->
     <app-projects-list 
-        title="Mis Proyectos en Ejecución"
+        tableTitle="Mis Proyectos en Ejecución"
         [projects]="projectsInExecution" 
         emptyStateMessage="Actualmente no tienes proyectos en estado de ejecución. Los proyectos aparecerán aquí una vez que los ejecutes."
         [canCreateProyect]="false"
@@ -13,7 +13,7 @@
 
     <!-- MIS PROYECTOS -->
     <app-projects-list 
-        title="Mis Proyectos"
+        tableTitle="Mis Proyectos"
         [projects]="otherProjects" 
         emptyStateMessage="No tienes proyectos creados aún. Comienza creando tu primer proyecto."
         [canCreateProyect]="true"

@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-10">
     <!-- PROYECTOS EN EJECUCIÓN EN LOS QUE COLABORO -->
     <app-projects-list 
-        title="Proyectos en Ejecución en los que Colaboro"
+        tableTitle="Proyectos en Ejecución en los que Colaboro"
         [projects]="projectsInExecution" 
         emptyStateMessage="No tienes proyectos en ejecución donde estés colaborando actualmente. Los proyectos aparecerán aquí cuando te asignen tareas en proyectos en ejecución."
         [canCreateProyect]="false"
@@ -13,7 +13,7 @@
 
     <!-- PROYECTOS CON PEDIDOS DE COLABORACIÓN PENDIENTES -->
     <app-projects-list 
-        title="Proyectos con Pedidos de Colaboración Pendientes"
+        tableTitle="Proyectos con Pedidos de Colaboración Pendientes"
         [projects]="otherProjects" 
         emptyStateMessage="No hay proyectos con pedidos de colaboración pendientes en este momento. Los proyectos que requieran tu colaboración aparecerán aquí."
         [canCreateProyect]="false"
