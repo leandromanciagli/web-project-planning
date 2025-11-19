@@ -5,14 +5,12 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({
   providedIn: 'root',
 })
-export class OngService {
+export class UserService {
   private readonly apiUrl = 'http://localhost:5001/api/v1';
 
   constructor(private http: HttpClient) { }
 
-  getAll(): Observable<any[]> {
-    return this.http.get<any>(`${this.apiUrl}/users`).pipe(
-      map(response => response.data || [])
-    );
+  getUserById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/users/${id}`);
   }
 }

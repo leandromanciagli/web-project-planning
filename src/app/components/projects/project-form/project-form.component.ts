@@ -216,7 +216,6 @@ export class ProjectFormComponent implements OnInit {
           priority: task.priority,
           dueDate: task.dueDate,
           estimatedHours: task.estimatedHours,
-          status: 'todo',
           taskTypeId: task.taskTypeId,
           isCoverageRequest: task.isCoverageRequest
         }))

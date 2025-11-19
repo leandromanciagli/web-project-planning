@@ -23,12 +23,12 @@ interface Task {
   title: string;
   description: string;
   status: string;
-  assignedTo?: string;
   dueDate: string;
   estimatedHours: number;
   actualHours: number | null;
   projectId: number;
   takenBy: number | null;
+  takenByUser?: any;
   createdBy: number;
   isCoverageRequest: boolean;
   createdAt: string;
@@ -69,6 +69,9 @@ export class ProjectsListComponent {
   selectedCollaborationId: number | null = null;
 
   tasks: Task[] = [];
+  loadingTasks: Record<number, boolean> = {};
+  loadingCollaborations = false;
+  loadingCommitment = false;
 
   constructor(
     private taskService: TaskService, 
@@ -79,16 +82,21 @@ export class ProjectsListComponent {
   getTasks(project: Project) {
     this.toggleExpand(project);
     if (this.expanded[project.id]) {
+      this.loadingTasks[project.id] = true;
       if (this.authService.hasRole('ONG_PRINCIPAL')) {
         this.taskService.getTasksByProject(project.id).subscribe(res => {
           this.tasks = res.data || [];
+          this.loadingTasks[project.id] = false;
         });
       }
       if (this.authService.hasRole('ONG_COLABORADORA')) {
         this.taskService.getCloudTasksByProject(project.id).subscribe(res => {
           this.tasks = res.data || [];
+          this.loadingTasks[project.id] = false;
         });
       }
+    } else {
+      this.loadingTasks[project.id] = false;
     }
   }
 
@@ -111,19 +119,14 @@ export class ProjectsListComponent {
     return project.id;
   }
 
-  getStatusClass(status: string): string {
-    const s = status.toLowerCase();
-    // Proyectos
-    if (s === 'generado') return 'status-generated';
-    if (s === 'planificado') return 'status-planned';
-    if (s === 'en ejecución' || s === 'en ejecucion') return 'status-executing';
-    if (s === 'completado') return 'status-completed';
+  getStatusName(status: string, takenBy: number | null): string {
 
-    // Tareas (fallbacks existentes)
-    if (s === 'en progreso') return 'status-progress';
-    if (s === 'pendiente' || s === 'todo') return 'status-planned';
+    if (status === 'todo' && takenBy === null) return 'Pendiente de asignación';
+    if (status === 'todo' && takenBy !== null) return 'Asignada';
+    if (status === 'in_progress') return 'En progreso';
+    if (status === 'done') return 'Completada';
 
-    return 'status-default';
+    return '';
   }
 
   openCommitModal(task: Task, project: Project, event?: Event) {
@@ -139,17 +142,20 @@ export class ProjectsListComponent {
     this.selectedTask = null;
     this.commitDescription = '';
     this.selectedProjectName = '';
+    this.loadingCommitment = false;
   }
 
   openCollabModal(task: Task, project: Project, event?: Event) {
     if (event) { event.stopPropagation(); }
     this.selectedTask = task;
     this.selectedProjectName = project.name;
-    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
-      this.collaborations = commitments || [];
-    });
     this.selectedCollaborationId = null;
     this.showCollabModal = true;
+    this.loadingCollaborations = true;
+    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
+      this.collaborations = commitments || [];
+      this.loadingCollaborations = false;
+    });
   }
 
   closeCollabModal() {
@@ -158,6 +164,7 @@ export class ProjectsListComponent {
     this.selectedProjectName = '';
     this.collaborations = [];
     this.selectedCollaborationId = null;
+    this.loadingCollaborations = false;
   }
 
   submitSelectedCollaboration() {
@@ -172,7 +179,8 @@ export class ProjectsListComponent {
   }
 
   submitCommitment() {
-    if (!this.selectedTask) { return; }
+    if (!this.selectedTask || !this.commitDescription.trim()) { return; }
+    this.loadingCommitment = true;
     const commitment = {
       taskId: this.selectedTask.id,
       ongId: this.authService.getUser()?.id,
@@ -180,9 +188,9 @@ export class ProjectsListComponent {
     };
     
     this.commitmentService.createCommitment(commitment).subscribe(commitment => {
-      console.log(commitment);
+      this.loadingCommitment = false;
+      this.closeCommitModal();
     });
-    this.closeCommitModal();
   }
 
   markCommitmentCompleted(task: Task, event?: Event) {

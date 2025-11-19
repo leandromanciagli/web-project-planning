@@ -51,36 +51,57 @@
           
           <!-- Fila colapsable de tareas con animación -->
           <tr>
-            <td [attr.colspan]="canExecuteProyect ? 5 : 4" class="bg-slate-950" *ngIf="tasks.length > 0">
+            <td [attr.colspan]="canExecuteProyect ? 5 : 4" class="bg-slate-950" *ngIf="expanded[project.id]">
               <div class="overflow-hidden transition-all duration-300 ease-out" [attr.id]="'project-collapse-' + project.id"
                   [style.maxHeight]="expanded[project.id] ? '1000px' : '0px'"
                   [style.opacity]="expanded[project.id] ? 1 : 0">
                 <div class="px-4 py-3">
-                <div class="space-y-3">
-                  <!-- Descripción del proyecto -->
-                  <div class="mb-4 pb-4 border-b border-slate-800">
-                    <h3 class="text-sm font-medium text-slate-400 mb-2">Descripción del Proyecto</h3>
-                    <p class="text-slate-300">{{ project.description || 'Sin descripción disponible' }}</p>
+                
+                  <!-- Loader mientras se cargan las tareas -->
+                  <div *ngIf="loadingTasks[project.id]" class="flex items-center justify-center py-8">
+                    <div class="flex flex-col items-center gap-3">
+                      <div class="w-12 h-12 border-4 border-slate-700 border-t-indigo-600 rounded-full animate-spin"></div>
+                      <p class="text-slate-400 text-sm">Cargando tareas...</p>
+                    </div>
                   </div>
-                  <!-- Listado de tareas -->
-                  <div class="rounded-lg border border-slate-800 bg-slate-900 p-4" *ngFor="let task of tasks">
+
+                  <!-- Contenido de tareas -->
+                  <div class="space-y-3" *ngIf="!loadingTasks[project.id] && tasks.length > 0">
+                    <!-- Descripción del proyecto -->
+                    <div class="mb-4 pt-4 pb-8 border-b border-slate-800">
+                      <h3 class="text-sm font-medium text-slate-400 mb-2">Descripción del Proyecto</h3>
+                      <p class="text-slate-300">{{ project.description || 'Sin descripción disponible' }}</p>
+                    </div>
+                    <!-- Listado de tareas -->
+                    <div class="rounded-lg border border-slate-800 bg-slate-900 p-4" *ngFor="let task of tasks">
                     <div class="flex items-center justify-between">
                       <h4 class="text-slate-200 font-medium">{{ task.title }}</h4>
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                      <span class="inline-flex items-center px-4 py-1 rounded-full text-sm font-medium"
                             [ngClass]="{
-                              'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30': getStatusClass(task.status) === 'status-completed',
-                              'bg-yellow-500/10 text-yellow-400 ring-1 ring-inset ring-yellow-500/30': getStatusClass(task.status) === 'status-progress',
-                              'bg-slate-500/10 text-slate-300 ring-1 ring-inset ring-slate-500/30': getStatusClass(task.status) === 'status-planned'
+                              'bg-slate-200/30 text-white ring-1 ring-inset ring-slate-200/30': task.status === 'todo' && task.takenBy === null,
+                              'bg-blue-500/10 text-blue-300 ring-1 ring-inset ring-blue-500/30': task.status === 'todo' && task.takenBy !== null,
+                              'bg-yellow-500/10 text-yellow-400 ring-1 ring-inset ring-yellow-500/30': task.status === 'in_progress',
+                              'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30': task.status === 'done',
                             }">
-                        {{ task.status }}
+                        {{ getStatusName(task.status, task.takenBy) }}
                       </span>
                     </div>
                   <p class="mt-2 text-sm text-slate-300">{{ task.description }}</p>
                   <div class="mt-3 flex items-center justify-between">
-                    <div class="text-xs text-slate-400">Asignado a: {{ task.assignedTo }}</div>
                     <div class="flex items-center gap-2">
-                      <button *ngIf="canViewCollaborations" type="button" (click)="openCollabModal(task, project, $event)" class="cursor-pointer px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition whitespace-nowrap text-sm">
-                        Ver colaboraciones
+                      <span class="text-sm text-white italic">
+                        {{ task.takenBy !== null ? 'Asignado a: ' + task.takenByUser.firstname + ' ' + task.takenByUser.lastname : 'Tarea sin asignar' }}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button 
+                        *ngIf="canViewCollaborations" 
+                        type="button" 
+                        (click)="openCollabModal(task, project, $event)" 
+                        class="cursor-pointer px-3 py-1.5 rounded-md  disabled:opacity-60 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-500 transition whitespace-nowrap text-sm"
+                        [disabled]="task.takenBy != null"
+                      >
+                        Ver solicitudes de compromiso
                       </button>
                       <button *ngIf="canCollaborate && task.isCoverageRequest" type="button" (click)="openCommitModal(task, project, $event)" class="cursor-pointer px-3 py-1.5 rounded-md text-white transition whitespace-nowrap text-sm bg-[#059669] hover:bg-[#059669]/90">
                         Colaborar
@@ -89,9 +110,10 @@
                         Marcar compromiso como cumplido
                       </button>
                     </div>
+                    </div>
+                    </div>
                   </div>
-                  </div>
-                  </div>
+                  
                 </div>
               </div>
             </td>
@@ -116,7 +138,7 @@
   <div class="w-full max-w-4xl rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl" (click)="$event.stopPropagation()">
     <div class="flex items-start justify-between gap-4">
       <h3 class="text-2xl font-semibold text-slate-200">Colaborar con el Proyecto: {{ selectedProjectName }}</h3>
-      <button class="text-slate-400 hover:text-slate-200" (click)="closeCommitModal()">✕</button>
+      <button class="cursor-pointer text-slate-400 hover:text-slate-200" (click)="closeCommitModal()">✕</button>
     </div>
 
     <div class="mt-4 grid grid-cols-1 gap-4" *ngIf="selectedTask as t">
@@ -145,43 +167,70 @@
     </div>
 
     <div class="mt-5">
-      <label class="block text-sm text-slate-300 mb-1">Descripción del compromiso</label>
+      <label class="block text-sm text-slate-300 mb-1">Descripción del compromiso <span class="text-red-400">*</span></label>
       <textarea [(ngModel)]="commitDescription" rows="4"
-                class="w-full rounded-md bg-slate-950 border border-slate-800 px-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                [disabled]="loadingCommitment"
+                class="w-full rounded-md bg-slate-950 border border-slate-800 px-3 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed"
                 placeholder="Escribe aquí tu compromiso o colaboración"></textarea>
     </div>
 
+    <!-- Loader para envío de compromiso -->
+    <div *ngIf="loadingCommitment" class="mt-5 flex items-center justify-center py-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 border-4 border-slate-700 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p class="text-slate-400 text-sm">Enviando compromiso...</p>
+      </div>
+    </div>
+
     <div class="mt-5 flex items-center justify-end gap-2">
-      <button type="button" class="cursor-pointer px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700" (click)="closeCommitModal()">Cancelar</button>
-      <button type="button" class="cursor-pointer px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500" (click)="submitCommitment()">Confirmar</button>
+      <button type="button" 
+              [disabled]="loadingCommitment"
+              class="cursor-pointer px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed" 
+              (click)="closeCommitModal()">Cancelar</button>
+      <button type="button" 
+              [disabled]="loadingCommitment || !commitDescription.trim()"
+              class="cursor-pointer px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed" 
+              (click)="submitCommitment()">Confirmar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal para ver/seleccionar colaboraciones de una tarea -->
+<!-- Modal para ver/seleccionar solicitudes de compromiso de una tarea -->
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60" *ngIf="showCollabModal" (click)="closeCollabModal()">
   <div class="w-full max-w-2xl rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl" (click)="$event.stopPropagation()">
-    <div class="flex items-start justify-between gap-4">
-      <h3 class="text-lg font-semibold text-slate-200">Colaboraciones para: {{ selectedTask ? selectedTask.title : '' }}</h3>
-      <button class="text-slate-400 hover:text-slate-200" (click)="closeCollabModal()">✕</button>
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <h3 class="text-lg font-semibold text-slate-200">Tarea: {{ selectedTask ? selectedTask.title : '' }}</h3>
+      <button class="cursor-pointer text-slate-400 hover:text-slate-200" (click)="closeCollabModal()">✕</button>
     </div>
 
-    <div class="mt-4 space-y-3" *ngIf="collaborations?.length; else noCollabsTpl">
-      <label class="block rounded-lg border border-slate-800 bg-slate-950 p-4 hover:bg-slate-800/40 transition cursor-pointer"
-             *ngFor="let c of collaborations">
-        <div class="flex items-start gap-3">
-          <input type="radio" name="collab" [value]="c.id" [(ngModel)]="selectedCollaborationId" class="mt-1.5 w-4 h-4 accent-indigo-600" />
-          <div class="flex-1">
-            <div class="text-slate-200 font-medium">{{ c.ongName }}</div>
-            <div class="text-slate-300 text-sm mt-1 italic">{{ c.description }}</div>
+    <!-- Loader mientras se cargan las solicitudes de compromiso -->
+    <div *ngIf="loadingCollaborations" class="mt-4 flex items-center justify-center py-8">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-4 border-slate-700 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p class="text-slate-400 text-sm">Cargando solicitudes de compromiso...</p>
+      </div>
+    </div>
+
+    <!-- Listado de solicitudes de compromiso -->
+    <div *ngIf="!loadingCollaborations">
+      <h3 class="text-sm font-medium text-slate-400 mb-2">Solicitudes de compromiso</h3>
+      <div class="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-2" *ngIf="collaborations?.length; else noCollabsTpl">
+        <label class="block rounded-lg border border-slate-800 bg-slate-950 p-4 hover:bg-slate-800/40 transition cursor-pointer"
+               *ngFor="let c of collaborations">
+          <div class="flex items-start gap-3">
+            <input type="radio" name="collab" [value]="c.id" [(ngModel)]="selectedCollaborationId" class="mt-1.5 w-4 h-4 accent-indigo-600" />
+            <div class="flex-1">
+              <div class="text-slate-200 font-medium">{{ c.ongUser.firstname }} {{ c.ongUser.lastname }}</div>
+              <div class="text-slate-300 text-sm mt-1 italic">{{ c.description }}</div>
+            </div>
           </div>
-        </div>
-      </label>
-    </div>
+        </label>
+      </div>
 
-    <ng-template #noCollabsTpl>
-      <div class="mt-4 text-slate-400">No hay colaboraciones disponibles para esta tarea.</div>
-    </ng-template>
+      <ng-template #noCollabsTpl>
+        <div class="mt-4 text-slate-400">No hay solicitudes de compromiso para esta tarea.</div>
+      </ng-template>
+    </div>
 
     <div class="mt-5 flex items-center justify-end gap-2">
       <button type="button" class="cursor-pointer px-4 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700" (click)="closeCollabModal()">Cancelar</button>

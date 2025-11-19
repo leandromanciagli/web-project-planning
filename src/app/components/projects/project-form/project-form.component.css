@@ -490,13 +490,11 @@ body {
   font-weight: 500;
 }
 
-/* Estilos para inputs de fecha - hacer todo el campo clickeable */
 input[type="date"] {
   cursor: pointer;
   position: relative;
 }
 
-/* Ocultar el icono del calendario nativo y hacer todo el campo clickeable */
 input[type="date"]::-webkit-calendar-picker-indicator {
   position: absolute;
   top: 0;

@@ -67,24 +67,24 @@
   text-transform: uppercase;
 }
 
-.status-completed {
-  background-color: #065f46;
-  color: #6ee7b7;
+.status-unassigned {
+  background-color: #374151;
+  color: #9ca3af;
 }
 
-.status-progress {
-  background-color: #92400e;
-  color: #fbbf24;
-}
-
-.status-planned {
+.status-assigned {
   background-color: #1e40af;
   color: #93c5fd;
 }
 
-.status-default {
-  background-color: #374151;
-  color: #9ca3af;
+.status-in-progress {
+  background-color: #92400e;
+  color: #fbbf24;
+}
+
+.status-completed {
+  background-color: #065f46;
+  color: #6ee7b7;
 }
 
 .btn {
@@ -291,4 +291,30 @@
   .header h2 {
     text-align: center;
   }
+}
+
+/* Estilos personalizados para el scrollbar en el modal de solicitudes */
+/* Para navegadores Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Para Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #1e293b;
 }
