@@ -25,8 +25,8 @@ export class CommitmentService {
     );
   }
 
-  assignCommitment(taskId: number, commitmentId: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/cloud-tasks/extension/assignCommitment`, { taskId, commitmentId, username: 'walter.bates', password: 'bpm' }).pipe(
+  assignCommitment(projectId: number, taskId: number, commitmentId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/cloud-tasks/extension/assignCommitment`, { projectId, taskId, commitmentId, username: 'walter.bates', password: 'bpm' }).pipe(
       map(response => response.data || [])
     );
   }

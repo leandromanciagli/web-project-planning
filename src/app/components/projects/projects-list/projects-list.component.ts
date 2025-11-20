@@ -58,15 +58,19 @@ export class ProjectsListComponent {
   formatDate = formatDateHelper;
 
   expanded: Record<number, boolean> = {};
-  showCommitModal = false;
+  showCreateCommitmentModal = false;
   selectedTask: Task | null = null;
   commitDescription: string = '';
   selectedProjectName: string = '';
   
   // Solicitudes de compromiso
-  showCollabModal = false;
+  showRequestsForCommitmentModal = false;
   collaborations: any[] = [];
   selectedCollaborationId: number | null = null;
+
+  showViewAssignedCommitmentModal = false;
+  assignedCommitment: any | null = null;
+  loadingAssignedCommitment = false;
 
   tasks: Task[] = [];
   loadingTasks: Record<number, boolean> = {};
@@ -129,45 +133,15 @@ export class ProjectsListComponent {
     return '';
   }
 
-  openCommitModal(task: Task, project: Project, event?: Event) {
+  openCreateCommitmentModal(task: Task, project: Project, event?: Event) {
     if (event) { event.stopPropagation(); }
     this.selectedTask = task;
     this.selectedProjectName = project.name;
     this.commitDescription = '';
-    this.showCommitModal = true;
+    this.showCreateCommitmentModal = true;
   }
 
-  closeCommitModal() {
-    this.showCommitModal = false;
-    this.selectedTask = null;
-    this.commitDescription = '';
-    this.selectedProjectName = '';
-    this.loadingCommitment = false;
-  }
-
-  openCollabModal(task: Task, project: Project, event?: Event) {
-    if (event) { event.stopPropagation(); }
-    this.selectedTask = task;
-    this.selectedProjectName = project.name;
-    this.selectedCollaborationId = null;
-    this.showCollabModal = true;
-    this.loadingCollaborations = true;
-    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
-      this.collaborations = commitments || [];
-      this.loadingCollaborations = false;
-    });
-  }
-
-  closeCollabModal() {
-    this.showCollabModal = false;
-    this.selectedTask = null;
-    this.selectedProjectName = '';
-    this.collaborations = [];
-    this.selectedCollaborationId = null;
-    this.loadingCollaborations = false;
-  }
-
-  submitCommitment() {
+  submitCreateCommitment() {
     if (!this.selectedTask || !this.commitDescription.trim()) { return; }
     this.loadingCommitment = true;
     const commitment = {
@@ -175,23 +149,86 @@ export class ProjectsListComponent {
       ongId: this.authService.getUser()?.id,
       description: this.commitDescription
     };
-    
+
     this.commitmentService.createCommitment(commitment).subscribe(commitment => {
       this.loadingCommitment = false;
-      this.closeCommitModal();
+      this.closeCreateCommitmentModal();
+      alert('Solicitud de compromiso creada exitosamente');
     });
   }
 
-  submitSelectedCollaboration() {
+  closeCreateCommitmentModal() {
+    this.showCreateCommitmentModal = false;
+    this.selectedTask = null;
+    this.commitDescription = '';
+    this.selectedProjectName = '';
+    this.loadingCommitment = false;
+  }
+
+  openRequestsForCommitmentModal(task: Task, project: Project, event?: Event) {
+    if (event) { event.stopPropagation(); }
+    this.selectedTask = task;
+    this.selectedProjectName = project.name;
+    this.selectedCollaborationId = null;
+    this.showRequestsForCommitmentModal = true;
+    this.loadingCollaborations = true;
+    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
+      this.collaborations = commitments || [];
+      this.loadingCollaborations = false;
+    });
+  }
+
+  submitAssignedCommitment() {
     if (!this.selectedTask || this.selectedCollaborationId == null) { return; }
-    this.commitmentService.assignCommitment(this.selectedTask.id, this.selectedCollaborationId).subscribe(res => {
-      console.log('Solicitud de compromiso asignada:', res);
+    const projectId = this.selectedTask.projectId;
+    this.loadingCommitment = true;
+    
+    this.commitmentService.assignCommitment(projectId, this.selectedTask.id, this.selectedCollaborationId).subscribe(res => {
       this.loadingCommitment = false;
-      this.closeCollabModal();
+      alert('Solicitud de compromiso asignada exitosamente');
+      this.closeRequestsForCommitmentModal();
+      
+      // Refrescar las tareas después de asignar el compromiso
+      this.loadingTasks[projectId] = true;
+      this.taskService.getTasksByProject(projectId).subscribe(tasksRes => {
+        this.tasks = tasksRes.data || [];
+        this.loadingTasks[projectId] = false;
+      });
     });
   }
 
-  markCommitmentCompleted(task: Task, event?: Event) {
+  closeRequestsForCommitmentModal() {
+    this.showRequestsForCommitmentModal = false;
+    this.selectedTask = null;
+    this.selectedProjectName = '';
+    this.collaborations = [];
+    this.selectedCollaborationId = null;
+    this.loadingCollaborations = false;
+  }
+
+  openViewAssignedCommitmentModal(task: Task, project: Project, event?: Event) {
+    if (event) { event.stopPropagation(); }
+    this.selectedTask = task;
+    this.selectedProjectName = project.name;
+    this.selectedCollaborationId = null;
+    this.showViewAssignedCommitmentModal = true;
+    this.loadingAssignedCommitment = true;
+    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
+      // Filtrar solo el commitment aprobado
+      const allCommitments = commitments || [];
+      this.assignedCommitment = allCommitments.find((c: any) => c.status === 'approved');
+      this.loadingAssignedCommitment = false;
+    });
+    
+  }
+
+  closeViewAssignedCommitmentModal() {
+    this.showViewAssignedCommitmentModal = false;
+    this.selectedTask = null;
+    this.selectedProjectName = '';
+  }
+
+  submitCompletedCommitment(task: Task, event?: Event) {
     if (event) { event.stopPropagation(); }
     const payload = { taskId: task.id };
     // TODO: Llamar API para marcar compromiso como realizado
