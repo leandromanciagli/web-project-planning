@@ -8,14 +8,15 @@
         [canCollaborate]="false"
         [canViewCollaborations]="false"
         [canExecuteProyect]="false"
-        [canCompleteCommitment]="false">
+        [canCompleteCommitment]="false"
+        [canCompleteProyect]="true">
     </app-projects-list>
 
     <!-- MIS PROYECTOS -->
     <app-projects-list 
         tableTitle="Mis Proyectos"
         [projects]="otherProjects" 
-        emptyStateMessage="No tienes proyectos creados aún. Comienza creando tu primer proyecto."
+        emptyStateMessage="No tienes proyectos pendientes de ejecución. Crea tu próximo proyecto."
         [canCreateProyect]="true"
         [canCollaborate]="false"
         [canViewCollaborations]="true"

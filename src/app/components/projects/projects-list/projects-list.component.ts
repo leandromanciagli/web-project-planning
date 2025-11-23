@@ -6,7 +6,7 @@ import { TaskService } from '@/services/task.service';
 import { formatDate as formatDateHelper } from '@/helpers/date.helper';
 import { AuthService } from '@/services/auth.service';
 import { CommitmentService } from '@/services/commitment.service';
-
+import { ProjectService } from '@/services/project.service';
 
 interface Project {
   id: number;
@@ -53,6 +53,7 @@ export class ProjectsListComponent {
   @Input() canViewCollaborations: boolean = false;
   @Input() canExecuteProyect: boolean = false;
   @Input() canCompleteCommitment: boolean = false;
+  @Input() canCompleteProyect: boolean = false;
 
   // Helper function para formatear fechas
   formatDate = formatDateHelper;
@@ -80,7 +81,8 @@ export class ProjectsListComponent {
   constructor(
     private taskService: TaskService, 
     private authService: AuthService, 
-    private commitmentService: CommitmentService
+    private commitmentService: CommitmentService,
+    private projectService: ProjectService
   ) {}
 
   getTasks(project: Project) {
@@ -121,6 +123,14 @@ export class ProjectsListComponent {
 
   trackByProjectId(index: number, project: Project): number {
     return project.id;
+  }
+
+  getProjectStatusName(status: string): string {
+    if (status === 'GENERADO') return 'GENERADO';
+    if (status === 'PLANIFICADO') return 'PLANIFICADO';
+    if (status === 'EN_EJECUCION') return 'EN EJECUCIÓN';
+    if (status === 'COMPLETADO') return 'COMPLETADO';
+    return '';
   }
 
   getStatusName(status: string, takenBy: number | null): string {
@@ -214,12 +224,11 @@ export class ProjectsListComponent {
     this.showViewAssignedCommitmentModal = true;
     this.loadingAssignedCommitment = true;
     this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
-      // Filtrar solo el commitment aprobado
+      // Filtrar solo el commitment aprobado o completado
       const allCommitments = commitments || [];
-      this.assignedCommitment = allCommitments.find((c: any) => c.status === 'approved');
+      this.assignedCommitment = allCommitments.find((c: any) => (c.status === 'approved' || c.status === 'done'));
       this.loadingAssignedCommitment = false;
     });
-    
   }
 
   closeViewAssignedCommitmentModal() {
@@ -228,18 +237,34 @@ export class ProjectsListComponent {
     this.selectedProjectName = '';
   }
 
-  submitCompletedCommitment(task: Task, event?: Event) {
-    if (event) { event.stopPropagation(); }
-    const payload = { taskId: task.id };
-    // TODO: Llamar API para marcar compromiso como realizado
-    // this.http.post('/api/v1/commitments/complete', payload).subscribe(...)
-    console.log('Marcar compromiso como realizado:', payload);
+  executeProject(project: Project) {
+    if (this.canExecuteProyect && project.status !== 'PLANIFICADO') { return; }
+    this.projectService.executeProject(project.id).subscribe((res: any) => {
+      console.log('Proyecto ejecutado:', res);
+      alert('Proyecto ejecutado exitosamente');
+    });
   }
 
-  executeProject(project: Project) {
-    if (project.status !== 'Planificado') { return; }
-    // TODO: Llamar API para ejecutar proyecto
-    // this.http.post(`/api/v1/projects/${project.id}/execute`, {}).subscribe(...)
-    console.log('Ejecutar proyecto:', project.id);
+  submitCommitmentDone(task: Task, event?: Event) {
+    if (event) { event.stopPropagation(); }
+    this.selectedTask = task;
+    if (this.selectedTask.isCoverageRequest) {
+      this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
+        // Filtrar solo el commitment aprobado
+        const allCommitments = commitments || [];
+        this.assignedCommitment = allCommitments.find((c: any) => c.status === 'approved');
+      });
+      this.commitmentService.markCommitmentDone(this.assignedCommitment.id).subscribe(res => {
+        alert('Compromiso marcado como cumplido exitosamente');
+      });
+    }
+  }
+
+  completeProject(project: Project) {
+    if (this.canCompleteProyect && project.status !== 'EN_EJECUCION') { return; }
+    this.projectService.completeProject(project.id).subscribe((res: any) => {
+      console.log('Proyecto completado:', res);
+      alert('Proyecto completado exitosamente');
+    });
   }
 }

@@ -94,4 +94,35 @@ export class ProjectService {
         })
       );
   }
+
+  executeProject(projectId: number): Observable<ApiResponse<any>> {
+    return this.http.post<any>(`${this.apiUrl}/${projectId}/execute`, {}, this.httpOptions)
+      .pipe(
+        map(response => ({
+          success: true,
+          data: response,
+          message: 'Proyecto ejecutado exitosamente'
+        })),
+        catchError(error => {
+          console.error('Error executing project:', error);
+          const errorMessage = error.error?.message || error.message || 'Error desconocido al ejecutar el proyecto';
+          return [{
+            success: false,
+            error: errorMessage,
+            message: 'Error al ejecutar el proyecto'
+          }];
+        })
+      );
+  }
+
+  completeProject(projectId: number): Observable<ApiResponse<any>> {
+    return this.http.post<any>(`${this.apiUrl}/${projectId}/complete`, {}, this.httpOptions)
+      .pipe(
+        map(response => ({
+          success: true,
+          data: response,
+          message: 'Proyecto completado exitosamente'
+        })),
+      );
+  }
 }

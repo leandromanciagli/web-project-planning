@@ -15,7 +15,7 @@
           <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Estado</th>
           <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Fecha Inicio</th>
           <th class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Fecha Fin</th>
-          <th *ngIf="canExecuteProyect" class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Acciones</th>
+          <th *ngIf="canExecuteProyect || canCompleteProyect" class="px-4 py-3 text-center text-xs font-medium text-slate-400 uppercase tracking-wider">Acciones</th>
           
         </tr>
       </thead>
@@ -31,10 +31,10 @@
                     [ngClass]="{
                       'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 text-sm': project.status === 'GENERADO',
                       'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30 text-sm': project.status === 'PLANIFICADO',
-                      'bg-orange-500/10 text-orange-400 ring-1 ring-inset ring-orange-500/30 text-sm': project.status === 'EN_EJECUCIÓN',
+                      'bg-orange-500/10 text-orange-400 ring-1 ring-inset ring-orange-500/30 text-sm': project.status === 'EN_EJECUCION',
                       'bg-slate-500/10 text-slate-300 ring-1 ring-inset ring-slate-500/30 text-sm': project.status === 'COMPLETADO'
                     }">
-                {{ project.status }}
+                {{ getProjectStatusName(project.status) }}
               </span>
             </td>
             <td class="px-4 text-slate-300 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">{{ formatDate(project.startDate) }}</td>
@@ -47,11 +47,18 @@
                 Ejecutar
               </button>
             </td>
+            <td *ngIf="canCompleteProyect" class="px-4 text-center" [ngClass]="{ 'py-5': expanded[project.id], 'py-3': !expanded[project.id] }">
+              <button type="button"
+                class="cursor-pointer px-3 py-1.5 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed text-sm bg-[#059669] hover:bg-[#059669]/90"
+                [disabled]="project.status !== 'EN_EJECUCION'" (click)="completeProject(project); $event.stopPropagation()">
+                Completar Proyecto
+              </button>
+            </td>
           </tr>
           
           <!-- Fila colapsable de tareas con animación -->
           <tr>
-            <td [attr.colspan]="canExecuteProyect ? 5 : 4" class="bg-slate-950" *ngIf="expanded[project.id]">
+            <td [attr.colspan]="canExecuteProyect || canCompleteProyect ? 5 : 4" class="bg-slate-950" *ngIf="expanded[project.id]">
               <div class="overflow-hidden transition-all duration-300 ease-out" [attr.id]="'project-collapse-' + project.id"
                   [style.maxHeight]="expanded[project.id] ? '1000px' : '0px'"
                   [style.opacity]="expanded[project.id] ? 1 : 0">
@@ -124,10 +131,11 @@
                         Colaborar
                       </button>
                       <button 
-                        *ngIf="canCompleteCommitment" 
+                        *ngIf="canCompleteCommitment"
                         type="button" 
-                        (click)="submitCompletedCommitment(task, $event)" 
-                        class="cursor-pointer px-3 py-1.5 rounded-md bg-[#059669] text-slate-200 hover:bg-[#059669]/70 transition whitespace-nowrap text-sm"
+                        (click)="submitCommitmentDone(task, $event)" 
+                        class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-[#059669] text-slate-200 hover:bg-[#059669]/70 transition whitespace-nowrap text-sm"
+                        [disabled]="task.status === 'done'"
                       >
                         Marcar compromiso como cumplido
                       </button>
