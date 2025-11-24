@@ -34,5 +34,11 @@ export class CollaborationsComponent implements OnInit {
     });
   }
 
+  onProjectUpdated(projectId: number): void {
+    // Refrescar ambos listados de proyectos cuando se actualiza uno
+    this.getRunningProjects();
+    this.getOtherProjects();
+  }
+
   
 }

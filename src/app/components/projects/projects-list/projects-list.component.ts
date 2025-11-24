@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -54,6 +54,8 @@ export class ProjectsListComponent {
   @Input() canExecuteProyect: boolean = false;
   @Input() canCompleteCommitment: boolean = false;
   @Input() canCompleteProyect: boolean = false;
+  
+  @Output() projectUpdated = new EventEmitter<number>();
 
   // Helper function para formatear fechas
   formatDate = formatDateHelper;
@@ -90,15 +92,29 @@ export class ProjectsListComponent {
     if (this.expanded[project.id]) {
       this.loadingTasks[project.id] = true;
       if (this.authService.hasRole('ONG_PRINCIPAL')) {
-        this.taskService.getTasksByProject(project.id).subscribe(res => {
-          this.tasks = res.data || [];
-          this.loadingTasks[project.id] = false;
+        this.taskService.getTasksByProject(project.id).subscribe({
+          next: (res) => {
+            this.tasks = res.data || [];
+            this.loadingTasks[project.id] = false;
+          },
+          error: (error) => {
+            console.error('Error obteniendo tareas:', error);
+            alert('Error al cargar las tareas del proyecto');
+            this.loadingTasks[project.id] = false;
+          }
         });
       }
       if (this.authService.hasRole('ONG_COLABORADORA')) {
-        this.taskService.getCloudTasksByProject(project.id).subscribe(res => {
-          this.tasks = res.data || [];
-          this.loadingTasks[project.id] = false;
+        this.taskService.getCloudTasksByProject(project.id).subscribe({
+          next: (res) => {
+            this.tasks = res.data || [];
+            this.loadingTasks[project.id] = false;
+          },
+          error: (error) => {
+            console.error('Error obteniendo tareas del cloud:', error);
+            alert('Error al cargar las tareas del proyecto');
+            this.loadingTasks[project.id] = false;
+          }
         });
       }
     } else {
@@ -130,6 +146,7 @@ export class ProjectsListComponent {
     if (status === 'PLANIFICADO') return 'PLANIFICADO';
     if (status === 'EN_EJECUCION') return 'EN EJECUCIÓN';
     if (status === 'COMPLETADO') return 'COMPLETADO';
+    if (status === 'FINALIZADO') return 'FINALIZADO';
     return '';
   }
 
@@ -160,10 +177,17 @@ export class ProjectsListComponent {
       description: this.commitDescription
     };
 
-    this.commitmentService.createCommitment(commitment).subscribe(commitment => {
-      this.loadingCommitment = false;
-      this.closeCreateCommitmentModal();
-      alert('Solicitud de compromiso creada exitosamente');
+    this.commitmentService.createCommitment(commitment).subscribe({
+      next: (commitment) => {
+        this.loadingCommitment = false;
+        this.closeCreateCommitmentModal();
+        alert('Solicitud de compromiso creada exitosamente');
+      },
+      error: (error) => {
+        console.error('Error creando compromiso:', error);
+        this.loadingCommitment = false;
+        alert('Error al crear la solicitud de compromiso. Por favor, intente nuevamente.');
+      }
     });
   }
 
@@ -182,9 +206,16 @@ export class ProjectsListComponent {
     this.selectedCollaborationId = null;
     this.showRequestsForCommitmentModal = true;
     this.loadingCollaborations = true;
-    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
-      this.collaborations = commitments || [];
-      this.loadingCollaborations = false;
+    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe({
+      next: (commitments) => {
+        this.collaborations = commitments || [];
+        this.loadingCollaborations = false;
+      },
+      error: (error) => {
+        console.error('Error obteniendo compromisos:', error);
+        alert('Error al cargar las solicitudes de compromiso');
+        this.loadingCollaborations = false;
+      }
     });
   }
 
@@ -193,17 +224,27 @@ export class ProjectsListComponent {
     const projectId = this.selectedTask.projectId;
     this.loadingCommitment = true;
     
-    this.commitmentService.assignCommitment(projectId, this.selectedTask.id, this.selectedCollaborationId).subscribe(res => {
-      this.loadingCommitment = false;
-      alert('Solicitud de compromiso asignada exitosamente');
-      this.closeRequestsForCommitmentModal();
-      
-      // Refrescar las tareas después de asignar el compromiso
-      this.loadingTasks[projectId] = true;
-      this.taskService.getTasksByProject(projectId).subscribe(tasksRes => {
-        this.tasks = tasksRes.data || [];
-        this.loadingTasks[projectId] = false;
-      });
+    this.commitmentService.assignCommitment(projectId, this.selectedTask.id, this.selectedCollaborationId).subscribe({
+      next: (res) => {
+        this.loadingCommitment = false;
+        alert('Solicitud de compromiso asignada exitosamente');
+        this.closeRequestsForCommitmentModal();
+        
+        // Refrescar las tareas del proyecto
+        this.loadingTasks[projectId] = true;
+        this.taskService.getTasksByProject(projectId).subscribe(tasksRes => {
+          this.tasks = tasksRes.data || [];
+          this.loadingTasks[projectId] = false;
+        });
+
+        // Emitir evento al padre para que refresque los proyectos
+        this.projectUpdated.emit(projectId);
+      },
+      error: (error) => {
+        console.error('Error asignando compromiso:', error);
+        this.loadingCommitment = false;
+        alert('Error al asignar la solicitud de compromiso. Por favor, intente nuevamente.');
+      }
     });
   }
 
@@ -223,11 +264,18 @@ export class ProjectsListComponent {
     this.selectedCollaborationId = null;
     this.showViewAssignedCommitmentModal = true;
     this.loadingAssignedCommitment = true;
-    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
-      // Filtrar solo el commitment aprobado o completado
-      const allCommitments = commitments || [];
-      this.assignedCommitment = allCommitments.find((c: any) => (c.status === 'approved' || c.status === 'done'));
-      this.loadingAssignedCommitment = false;
+    this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe({
+      next: (commitments) => {
+        // Filtrar solo el commitment aprobado o completado
+        const allCommitments = commitments || [];
+        this.assignedCommitment = allCommitments.find((c: any) => (c.status === 'approved' || c.status === 'done'));
+        this.loadingAssignedCommitment = false;
+      },
+      error: (error) => {
+        console.error('Error obteniendo compromiso asignado:', error);
+        alert('Error al cargar el compromiso asignado');
+        this.loadingAssignedCommitment = false;
+      }
     });
   }
 
@@ -239,32 +287,74 @@ export class ProjectsListComponent {
 
   executeProject(project: Project) {
     if (this.canExecuteProyect && project.status !== 'PLANIFICADO') { return; }
-    this.projectService.executeProject(project.id).subscribe((res: any) => {
-      console.log('Proyecto ejecutado:', res);
-      alert('Proyecto ejecutado exitosamente');
+    this.projectService.executeProject(project.id).subscribe({
+      next: (res: any) => {
+        console.log('Proyecto ejecutado:', res);
+        alert('Proyecto ejecutado exitosamente');
+        // Emitir evento al padre para que refresque los proyectos
+        this.projectUpdated.emit(project.id);
+      },
+      error: (error) => {
+        console.error('Error ejecutando proyecto:', error);
+        alert('Error al ejecutar el proyecto. Por favor, intente nuevamente.');
+      }
     });
   }
 
   submitCommitmentDone(task: Task, event?: Event) {
     if (event) { event.stopPropagation(); }
-    this.selectedTask = task;
-    if (this.selectedTask.isCoverageRequest) {
-      this.commitmentService.getCommitmentsByTask(this.selectedTask.id).subscribe(commitments => {
-        // Filtrar solo el commitment aprobado
-        const allCommitments = commitments || [];
-        this.assignedCommitment = allCommitments.find((c: any) => c.status === 'approved');
-      });
-      this.commitmentService.markCommitmentDone(this.assignedCommitment.id).subscribe(res => {
-        alert('Compromiso marcado como cumplido exitosamente');
+    if (task.isCoverageRequest) {
+      this.commitmentService.getCommitmentsByTask(task.id).subscribe({
+        next: (commitments) => {
+          // Filtrar solo el commitment aprobado
+          const allCommitments = commitments || [];
+          this.assignedCommitment = allCommitments.find((c: any) => c.status === 'approved');
+          
+          if (this.assignedCommitment) {
+            this.commitmentService.markCommitmentDone(this.assignedCommitment.id).subscribe({
+              next: (res) => {
+                alert('Compromiso marcado como cumplido exitosamente');
+
+                // Refrescar las tareas del proyecto
+                this.loadingTasks[task.projectId] = true;
+                this.taskService.getTasksByProject(task.projectId).subscribe(tasksRes => {
+                  this.tasks = tasksRes.data || [];
+                  this.loadingTasks[task.projectId] = false;
+                });
+
+                // Emitir evento al padre para que refresque los proyectos
+                this.projectUpdated.emit(task.projectId);
+              },
+              error: (error) => {
+                console.error('Error marcando compromiso como cumplido:', error);
+                alert('Error al marcar el compromiso como cumplido. Por favor, intente nuevamente.');
+              }
+            });
+          } else {
+            alert('No se encontró un compromiso aprobado para esta tarea');
+          }
+        },
+        error: (error) => {
+          console.error('Error obteniendo compromisos:', error);
+          alert('Error al marcar el compromiso como cumplido. Por favor, intente nuevamente.');
+        }
       });
     }
   }
 
-  completeProject(project: Project) {
-    if (this.canCompleteProyect && project.status !== 'EN_EJECUCION') { return; }
-    this.projectService.completeProject(project.id).subscribe((res: any) => {
-      console.log('Proyecto completado:', res);
-      alert('Proyecto completado exitosamente');
+  finishProject(project: Project) {
+    if (this.canCompleteProyect && project.status !== 'COMPLETADO') { return; }
+    this.projectService.finishProject(project.id).subscribe({
+      next: (res: any) => {
+        console.log('Proyecto finalizado:', res);
+        alert('Proyecto finalizado exitosamente');
+        // Emitir evento al padre para que refresque los proyectos
+        this.projectUpdated.emit(project.id);
+      },
+      error: (error) => {
+        console.error('Error finalizando proyecto:', error);
+        alert('Error al finalizar el proyecto. Por favor, intente nuevamente.');
+      }
     });
   }
 }

@@ -115,13 +115,13 @@ export class ProjectService {
       );
   }
 
-  completeProject(projectId: number): Observable<ApiResponse<any>> {
-    return this.http.post<any>(`${this.apiUrl}/${projectId}/complete`, {}, this.httpOptions)
+  finishProject(projectId: number): Observable<ApiResponse<any>> {
+    return this.http.post<any>(`${this.apiUrl}/${projectId}/finish`, {}, this.httpOptions)
       .pipe(
         map(response => ({
           success: true,
           data: response,
-          message: 'Proyecto completado exitosamente'
+          message: 'Proyecto finalizado exitosamente'
         })),
       );
   }

@@ -9,7 +9,8 @@
         [canViewCollaborations]="false"
         [canExecuteProyect]="false"
         [canCompleteCommitment]="false"
-        [canCompleteProyect]="true">
+        [canCompleteProyect]="true"
+        (projectUpdated)="onProjectUpdated($event)">
     </app-projects-list>
 
     <!-- MIS PROYECTOS -->
@@ -21,6 +22,7 @@
         [canCollaborate]="false"
         [canViewCollaborations]="true"
         [canExecuteProyect]="true"
-        [canCompleteCommitment]="false">
+        [canCompleteCommitment]="false"
+        (projectUpdated)="onProjectUpdated($event)">
     </app-projects-list>
 </div>

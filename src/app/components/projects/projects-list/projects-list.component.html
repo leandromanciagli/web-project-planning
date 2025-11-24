@@ -32,7 +32,8 @@
                       'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 text-sm': project.status === 'GENERADO',
                       'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30 text-sm': project.status === 'PLANIFICADO',
                       'bg-orange-500/10 text-orange-400 ring-1 ring-inset ring-orange-500/30 text-sm': project.status === 'EN_EJECUCION',
-                      'bg-slate-500/10 text-slate-300 ring-1 ring-inset ring-slate-500/30 text-sm': project.status === 'COMPLETADO'
+                      'bg-slate-500/10 text-slate-300 ring-1 ring-inset ring-slate-500/30 text-sm': project.status === 'COMPLETADO',
+                      'bg-red-500/10 text-red-300 ring-1 ring-inset ring-red-500/30 text-sm': project.status === 'FINALIZADO',
                     }">
                 {{ getProjectStatusName(project.status) }}
               </span>
@@ -40,18 +41,22 @@
             <td class="px-4 text-slate-300 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">{{ formatDate(project.startDate) }}</td>
             <td class="px-4 text-slate-300 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">{{ formatDate(project.endDate) }}</td>
             <td *ngIf="canExecuteProyect" class="px-4 text-center" [ngClass]="{ 'py-5': expanded[project.id], 'py-3': !expanded[project.id] }">
-              <button type="button"
-                      class="cursor-pointer px-3 py-1.5 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed text-sm bg-[#059669] hover:bg-[#059669]/90"
-                      [disabled]="project.status !== 'PLANIFICADO'"
-                      (click)="executeProject(project); $event.stopPropagation()">
+              <button 
+                type="button"
+                class="cursor-pointer px-3 py-1.5 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed text-sm bg-[#059669] hover:bg-[#059669]/90"
+                [disabled]="project.status !== 'PLANIFICADO'"
+                (click)="executeProject(project); $event.stopPropagation()"
+              >
                 Ejecutar
               </button>
             </td>
             <td *ngIf="canCompleteProyect" class="px-4 text-center" [ngClass]="{ 'py-5': expanded[project.id], 'py-3': !expanded[project.id] }">
-              <button type="button"
+              <button 
+                type="button"
                 class="cursor-pointer px-3 py-1.5 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed text-sm bg-[#059669] hover:bg-[#059669]/90"
-                [disabled]="project.status !== 'EN_EJECUCION'" (click)="completeProject(project); $event.stopPropagation()">
-                Completar Proyecto
+                [disabled]="project.status !== 'COMPLETADO'" (click)="finishProject(project); $event.stopPropagation()"
+              >
+                Finalizar Proyecto
               </button>
             </td>
           </tr>

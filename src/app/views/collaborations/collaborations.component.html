@@ -8,7 +8,8 @@
         [canCollaborate]="false"
         [canViewCollaborations]="false"
         [canExecuteProyect]="false"
-        [canCompleteCommitment]="true">
+        [canCompleteCommitment]="true"
+        (projectUpdated)="onProjectUpdated($event)">
     </app-projects-list>
 
     <!-- PROYECTOS CON PEDIDOS DE COLABORACIÓN PENDIENTES -->
@@ -20,6 +21,7 @@
         [canCollaborate]="true"
         [canViewCollaborations]="false"
         [canExecuteProyect]="false"
-        [canCompleteCommitment]="false">
+        [canCompleteCommitment]="false"
+        (projectUpdated)="onProjectUpdated($event)">
     </app-projects-list>
 </div>

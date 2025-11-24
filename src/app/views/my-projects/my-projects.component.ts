@@ -27,7 +27,7 @@ export class MyProjectsComponent implements OnInit {
   getRunningProjects(): void {
     const user = this.authService.getUser();
     const userId = user?.id;
-    this.projectService.getProjects({ status: ['EN_EJECUCION'], createdBy: userId }).subscribe(res => {
+    this.projectService.getProjects({ status: ['EN_EJECUCION', 'COMPLETADO'], createdBy: userId }).subscribe(res => {
       this.projectsInExecution = res.data || [];
     });
   }
@@ -35,8 +35,14 @@ export class MyProjectsComponent implements OnInit {
   getOtherProjects(): void {
     const user = this.authService.getUser();
     const userId = user?.id;
-    this.projectService.getProjects({ status: ['GENERADO', 'PLANIFICADO', 'COMPLETADO'], createdBy: userId }).subscribe(res => {
+    this.projectService.getProjects({ status: ['GENERADO', 'PLANIFICADO', 'FINALIZADO'], createdBy: userId }).subscribe(res => {
         this.otherProjects = res.data || [];
     });    
+  }
+
+  onProjectUpdated(projectId: number): void {
+    // Refrescar ambos listados de proyectos cuando se actualiza un proyecto
+    this.getRunningProjects();
+    this.getOtherProjects();
   }
 }
