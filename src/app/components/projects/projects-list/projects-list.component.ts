@@ -7,6 +7,7 @@ import { formatDate as formatDateHelper } from '@/helpers/date.helper';
 import { AuthService } from '@/services/auth.service';
 import { CommitmentService } from '@/services/commitment.service';
 import { ProjectService } from '@/services/project.service';
+import { TaskObservationService } from '@/services/task-observation.service';
 
 interface Project {
   id: number;
@@ -34,6 +35,8 @@ interface Task {
   createdAt: string;
   updatedAt: string;
   taskType: { id: number; title: string };
+  commitments: any[];
+  observations: any[];
 }
 
 
@@ -54,44 +57,75 @@ export class ProjectsListComponent {
   @Input() canExecuteProyect: boolean = false;
   @Input() canCompleteCommitment: boolean = false;
   @Input() canCompleteProyect: boolean = false;
-  
+  @Input() canGenerateObservations: boolean = false;
+  @Input() canViewObservationsHistory: boolean = false;
+  @Input() canResolveObservations: boolean = false;
   @Output() projectUpdated = new EventEmitter<number>();
 
   // Helper function para formatear fechas
   formatDate = formatDateHelper;
 
   expanded: Record<number, boolean> = {};
-  showCreateCommitmentModal = false;
-  selectedTask: Task | null = null;
-  commitDescription: string = '';
   selectedProjectName: string = '';
-  
-  // Solicitudes de compromiso
+  tasks: Task[] = [];
+  loadingTasks: Record<number, boolean> = {};
+  loadingCompleteCommitment: Record<number, boolean> = {};
+  loadingExecuteProject: Record<number, boolean> = {};
+  loadingFinishProject: Record<number, boolean> = {};
+  selectedTask: any = null;
+
+
+  // Variables para modal de creación de compromiso
+  showCreateCommitmentModal = false;
+  loadingCreateCommitmentModal = false;
+  commitDescription: string = '';
+
+
+  // Variables para modal de solicitudes de compromiso
   showRequestsForCommitmentModal = false;
+  loadingCollaborations = false;
   collaborations: any[] = [];
   selectedCollaborationId: number | null = null;
 
-  showViewAssignedCommitmentModal = false;
-  assignedCommitment: any | null = null;
-  loadingAssignedCommitment = false;
 
-  tasks: Task[] = [];
-  loadingTasks: Record<number, boolean> = {};
-  loadingCollaborations = false;
-  loadingCommitment = false;
+  // Variables para modal de compromiso asignado
+  showViewAssignedCommitmentModal = false;
+  loadingAssignedCommitment = false;
+  assignedCommitment: any | null = null;
+
+
+  // Variables para modal de generación de observaciones
+  showModalGenerateObservation: boolean = false;
+  loadingGenerateObservation: boolean = false;
+  observationDescription: string = '';
+  observation: any = null;
+
+  // Variables para modal de historial de observaciones
+  showModalViewObservationsHistory: boolean = false;
+  loadingViewObservationsHistory: boolean = false;
+  taskObservationsHistory: any[] = [];
+
+
+  // Variables para modal de resolución de observaciones
+  showModalResolveObservation: boolean = false;
+  loadingResolveObservation: boolean = false;
+  resolution: string = '';
+  approvedCommitment: any = null;
+
 
   constructor(
     private taskService: TaskService, 
-    private authService: AuthService, 
+    protected authService: AuthService, 
     private commitmentService: CommitmentService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private taskObservationService: TaskObservationService,
   ) {}
 
   getTasks(project: Project) {
     this.toggleExpand(project);
     if (this.expanded[project.id]) {
       this.loadingTasks[project.id] = true;
-      if (this.authService.hasRole('ONG_PRINCIPAL')) {
+      if (this.authService.hasRole('ONG_PRINCIPAL') || this.authService.hasRole('ONG_GERENCIAL')) {
         this.taskService.getTasksByProject(project.id).subscribe({
           next: (res) => {
             this.tasks = res.data || [];
@@ -150,14 +184,29 @@ export class ProjectsListComponent {
     return '';
   }
 
-  getStatusName(status: string, takenBy: number | null): string {
+  getTaskStatusName(status: string, takenBy: number | null): string {
 
-    if (status === 'todo' && takenBy === null) return 'Pendiente de asignación';
-    if (status === 'todo' && takenBy !== null) return 'Asignada';
-    if (status === 'in_progress') return 'En progreso';
-    if (status === 'done') return 'Completada';
+    if (status === 'todo' && takenBy === null) return 'PENDIENTE DE ASIGNACIÓN';
+    if (status === 'todo' && takenBy !== null) return 'ASIGNADA';
+    if (status === 'in_progress') return 'EN PROGRESO';
+    if (status === 'done') return 'COMPLETADA';
 
     return '';
+  }
+
+  getCommitmentStatusName(status: string): string {
+
+    if (status === 'pending') return 'COMPROMISO PENDIENTE DE APROBACIÓN';
+    if (status === 'approved') return 'COMPROMISO APROBADO';
+    if (status === 'rejected') return 'COMPROMISO RECHAZADO';
+    if (status === 'done') return 'COMPROMISO COMPLETADO';
+
+    return '';
+  }
+
+  hasCommitment(task: Task): any {
+    const commitment = task.commitments.find((commitment: any) => commitment.ongId == this.authService.getUser().id);
+    return commitment ? this.getCommitmentStatusName(commitment.status) : '';
   }
 
   openCreateCommitmentModal(task: Task, project: Project, event?: Event) {
@@ -170,7 +219,8 @@ export class ProjectsListComponent {
 
   submitCreateCommitment() {
     if (!this.selectedTask || !this.commitDescription.trim()) { return; }
-    this.loadingCommitment = true;
+    this.loadingCreateCommitmentModal = true;
+    const projectId = this.selectedTask.projectId;
     const commitment = {
       taskId: this.selectedTask.id,
       ongId: this.authService.getUser()?.id,
@@ -179,13 +229,20 @@ export class ProjectsListComponent {
 
     this.commitmentService.createCommitment(commitment).subscribe({
       next: (commitment) => {
-        this.loadingCommitment = false;
-        this.closeCreateCommitmentModal();
+        this.loadingCreateCommitmentModal = false;
         alert('Solicitud de compromiso creada exitosamente');
+        this.closeCreateCommitmentModal();
+
+        // Refrescar las tareas del proyecto
+        this.loadingTasks[projectId] = true;
+        this.taskService.getTasksByProject(projectId).subscribe(tasksRes => {
+          this.tasks = tasksRes.data || [];
+          this.loadingTasks[projectId] = false;
+        });
       },
       error: (error) => {
         console.error('Error creando compromiso:', error);
-        this.loadingCommitment = false;
+        this.loadingCreateCommitmentModal = false;
         alert('Error al crear la solicitud de compromiso. Por favor, intente nuevamente.');
       }
     });
@@ -196,7 +253,7 @@ export class ProjectsListComponent {
     this.selectedTask = null;
     this.commitDescription = '';
     this.selectedProjectName = '';
-    this.loadingCommitment = false;
+    this.loadingCreateCommitmentModal = false;
   }
 
   openRequestsForCommitmentModal(task: Task, project: Project, event?: Event) {
@@ -222,11 +279,11 @@ export class ProjectsListComponent {
   submitAssignedCommitment() {
     if (!this.selectedTask || this.selectedCollaborationId == null) { return; }
     const projectId = this.selectedTask.projectId;
-    this.loadingCommitment = true;
+    this.loadingCreateCommitmentModal = true;
     
     this.commitmentService.assignCommitment(projectId, this.selectedTask.id, this.selectedCollaborationId).subscribe({
       next: (res) => {
-        this.loadingCommitment = false;
+        this.loadingCreateCommitmentModal = false;
         alert('Solicitud de compromiso asignada exitosamente');
         this.closeRequestsForCommitmentModal();
         
@@ -242,7 +299,7 @@ export class ProjectsListComponent {
       },
       error: (error) => {
         console.error('Error asignando compromiso:', error);
-        this.loadingCommitment = false;
+        this.loadingCreateCommitmentModal = false;
         alert('Error al asignar la solicitud de compromiso. Por favor, intente nuevamente.');
       }
     });
@@ -287,14 +344,17 @@ export class ProjectsListComponent {
 
   executeProject(project: Project) {
     if (this.canExecuteProyect && project.status !== 'PLANIFICADO') { return; }
+    this.loadingExecuteProject[project.id] = true;
     this.projectService.executeProject(project.id).subscribe({
       next: (res: any) => {
+        this.loadingExecuteProject[project.id] = false;
         console.log('Proyecto ejecutado:', res);
         alert('Proyecto ejecutado exitosamente');
         // Emitir evento al padre para que refresque los proyectos
         this.projectUpdated.emit(project.id);
       },
       error: (error) => {
+        this.loadingExecuteProject[project.id] = false;
         console.error('Error ejecutando proyecto:', error);
         alert('Error al ejecutar el proyecto. Por favor, intente nuevamente.');
       }
@@ -304,38 +364,26 @@ export class ProjectsListComponent {
   submitCommitmentDone(task: Task, event?: Event) {
     if (event) { event.stopPropagation(); }
     if (task.isCoverageRequest) {
-      this.commitmentService.getCommitmentsByTask(task.id).subscribe({
-        next: (commitments) => {
-          // Filtrar solo el commitment aprobado
-          const allCommitments = commitments || [];
-          this.assignedCommitment = allCommitments.find((c: any) => c.status === 'approved');
-          
-          if (this.assignedCommitment) {
-            this.commitmentService.markCommitmentDone(this.assignedCommitment.id).subscribe({
-              next: (res) => {
-                alert('Compromiso marcado como cumplido exitosamente');
+      this.loadingCompleteCommitment[task.id] = true;
+      
+      this.commitmentService.markCommitmentDone(this.getApprovedCommitment(task).id).subscribe({
+        next: (res) => {
+          this.loadingCompleteCommitment[task.id] = false;
+          alert('Compromiso marcado como cumplido exitosamente');
 
-                // Refrescar las tareas del proyecto
-                this.loadingTasks[task.projectId] = true;
-                this.taskService.getTasksByProject(task.projectId).subscribe(tasksRes => {
-                  this.tasks = tasksRes.data || [];
-                  this.loadingTasks[task.projectId] = false;
-                });
+          // Refrescar las tareas del proyecto
+          this.loadingTasks[task.projectId] = true;
+          this.taskService.getTasksByProject(task.projectId).subscribe(tasksRes => {
+            this.tasks = tasksRes.data || [];
+            this.loadingTasks[task.projectId] = false;
+          });
 
-                // Emitir evento al padre para que refresque los proyectos
-                this.projectUpdated.emit(task.projectId);
-              },
-              error: (error) => {
-                console.error('Error marcando compromiso como cumplido:', error);
-                alert('Error al marcar el compromiso como cumplido. Por favor, intente nuevamente.');
-              }
-            });
-          } else {
-            alert('No se encontró un compromiso aprobado para esta tarea');
-          }
+          // Emitir evento al padre para que refresque los proyectos
+          this.projectUpdated.emit(task.projectId);
         },
         error: (error) => {
-          console.error('Error obteniendo compromisos:', error);
+          console.error('Error marcando compromiso como cumplido:', error);
+          this.loadingCompleteCommitment[task.id] = false;
           alert('Error al marcar el compromiso como cumplido. Por favor, intente nuevamente.');
         }
       });
@@ -344,16 +392,125 @@ export class ProjectsListComponent {
 
   finishProject(project: Project) {
     if (this.canCompleteProyect && project.status !== 'COMPLETADO') { return; }
+    this.loadingFinishProject[project.id] = true;
     this.projectService.finishProject(project.id).subscribe({
       next: (res: any) => {
+        this.loadingFinishProject[project.id] = false;
         console.log('Proyecto finalizado:', res);
         alert('Proyecto finalizado exitosamente');
         // Emitir evento al padre para que refresque los proyectos
         this.projectUpdated.emit(project.id);
       },
       error: (error) => {
+        this.loadingFinishProject[project.id] = false;
         console.error('Error finalizando proyecto:', error);
         alert('Error al finalizar el proyecto. Por favor, intente nuevamente.');
+      }
+    });
+  }
+
+  openModalGenerateObservation(task: any): void {
+    this.selectedTask = task;
+    this.approvedCommitment = this.getApprovedCommitment(task);
+    this.showModalGenerateObservation = true;
+  }
+
+  submitGenerateObservation(): void {
+    this.loadingGenerateObservation = true;
+    this.taskObservationService.createTaskObservation({ taskId: this.selectedTask.id, observation: this.observationDescription, userId: this.authService.getUser().id }).subscribe(res => {
+      this.loadingGenerateObservation = false;
+      this.closeModalGenerateObservation();
+      alert('Observación generada exitosamente');
+
+      // Refrescar las tareas del proyecto
+      this.loadingTasks[this.selectedTask.projectId] = true;
+      this.taskService.getTasksByProject(this.selectedTask.projectId).subscribe(tasksRes => {
+        this.tasks = tasksRes.data || [];
+        this.loadingTasks[this.selectedTask.projectId] = false;
+      });
+
+    });
+  }
+
+  openModalViewObservationsHistory(task: any): void {
+    this.loadingViewObservationsHistory = true;
+    this.showModalViewObservationsHistory = true;
+    this.taskObservationsHistory = [];
+    this.taskObservationService.getTaskObservations(task.id).subscribe({
+      next: (res) => {
+        this.taskObservationsHistory = res || [];
+        this.taskObservationsHistory.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA; // Orden descendente (más reciente primero)
+        });
+        this.loadingViewObservationsHistory = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar el historial de observaciones:', err);
+        this.taskObservationsHistory = [];
+        this.loadingViewObservationsHistory = false;
+      }
+    });
+  }
+
+  closeModalGenerateObservation(): void {
+    this.showModalGenerateObservation = false;
+    this.selectedTask = null;
+    this.approvedCommitment = null;
+    this.observationDescription = '';
+    this.loadingGenerateObservation = false;
+  }
+
+  closeModalViewObservationsHistory(): void {
+    this.showModalViewObservationsHistory = false;
+    this.taskObservationsHistory = [];
+    this.approvedCommitment = null;
+  }
+
+  getApprovedCommitment(task: Task): any {
+    return task.commitments.find((commitment: any) => commitment.status === 'approved');
+  }
+
+  getObservationWithoutResolution(task: Task): any {
+    return task.observations.find((observation: any) => observation.resolution === null);
+  }
+
+  openModalResolveObservation(task: any): void {
+    this.selectedTask = task;
+    this.approvedCommitment = this.getApprovedCommitment(task);
+    this.observation = this.getObservationWithoutResolution(task);
+    this.showModalResolveObservation = true;
+  }
+
+  closeModalResolveObservation(): void {
+    this.showModalResolveObservation = false;
+    this.selectedTask = null;
+    this.approvedCommitment = null;
+    this.observation = null;
+    this.resolution = '';
+  }
+
+  submitResolveObservation(): void {
+    this.loadingResolveObservation = true;
+    this.taskObservationService.resolveTaskObservation(this.observation.id, this.resolution, this.authService.getUser().id).subscribe({
+      next: (res: any) => {
+        this.loadingResolveObservation = false;
+        alert('Observación resuelta exitosamente');
+        
+        // Refrescar las tareas del proyecto
+        this.loadingTasks[this.selectedTask.projectId] = true;
+        this.taskService.getTasksByProject(this.selectedTask.projectId).subscribe(tasksRes => {
+          this.tasks = tasksRes.data || [];
+          this.loadingTasks[this.selectedTask.projectId] = false;
+        });
+
+        this.closeModalResolveObservation();
+      },
+      error: (error: any) => {
+        console.error(error);
+        this.loadingResolveObservation = false;
+        alert('Error al resolver la observación. Por favor, intente nuevamente.');
       }
     });
   }

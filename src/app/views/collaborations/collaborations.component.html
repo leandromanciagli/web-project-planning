@@ -3,25 +3,18 @@
     <app-projects-list 
         tableTitle="Proyectos en Ejecución en los que Colaboro"
         [projects]="projectsInExecution" 
-        emptyStateMessage="No tienes proyectos en ejecución donde estés colaborando actualmente. Los proyectos aparecerán aquí cuando te asignen tareas en proyectos en ejecución."
-        [canCreateProyect]="false"
-        [canCollaborate]="false"
-        [canViewCollaborations]="false"
-        [canExecuteProyect]="false"
         [canCompleteCommitment]="true"
-        (projectUpdated)="onProjectUpdated($event)">
+        [canResolveObservations]="true"
+        (projectUpdated)="onProjectUpdated($event)"
+        emptyStateMessage="No tienes proyectos en ejecución donde estés colaborando actualmente. Los proyectos aparecerán aquí cuando te asignen tareas en proyectos en ejecución.">
     </app-projects-list>
 
     <!-- PROYECTOS CON PEDIDOS DE COLABORACIÓN PENDIENTES -->
     <app-projects-list 
         tableTitle="Proyectos con Pedidos de Colaboración Pendientes"
         [projects]="otherProjects" 
-        emptyStateMessage="No hay proyectos con pedidos de colaboración pendientes en este momento. Los proyectos que requieran tu colaboración aparecerán aquí."
-        [canCreateProyect]="false"
         [canCollaborate]="true"
-        [canViewCollaborations]="false"
-        [canExecuteProyect]="false"
-        [canCompleteCommitment]="false"
-        (projectUpdated)="onProjectUpdated($event)">
+        (projectUpdated)="onProjectUpdated($event)"
+        emptyStateMessage="No hay proyectos con pedidos de colaboración pendientes en este momento. Los proyectos que requieran tu colaboración aparecerán aquí.">
     </app-projects-list>
 </div>

@@ -1,0 +1,10 @@
+<div class="flex flex-col gap-10">
+    <!-- PROYECTOS EN EJECUCIÓN -->
+    <app-projects-list 
+        tableTitle="Proyectos en Ejecución"
+        [projects]="projectsInExecution" 
+        [canGenerateObservations]="true"
+        (projectUpdated)="onProjectUpdated($event)"
+        emptyStateMessage="Actualmente no hay proyectos en estado de ejecución. Los proyectos aparecerán aquí una vez que estén en fase de ejecución.">
+    </app-projects-list>
+</div>

@@ -1,11 +1,16 @@
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ProjectsListComponent } from '@/components/projects/projects-list/projects-list.component';
 import { ProjectService } from '@/services/project.service';
 
 @Component({
   selector: 'app-collaborations',
-  imports: [CommonModule, ProjectsListComponent],
+  imports: [
+    CommonModule,
+    ProjectsListComponent,
+    FormsModule,
+  ],
   templateUrl: './collaborations.component.html',
   styleUrl: './collaborations.component.css'
 })
@@ -39,6 +44,4 @@ export class CollaborationsComponent implements OnInit {
     this.getRunningProjects();
     this.getOtherProjects();
   }
-
-  
 }

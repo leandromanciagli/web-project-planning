@@ -3,26 +3,20 @@
     <app-projects-list 
         tableTitle="Mis Proyectos en Ejecución"
         [projects]="projectsInExecution" 
-        emptyStateMessage="Actualmente no tienes proyectos en estado de ejecución. Los proyectos aparecerán aquí una vez que los ejecutes."
-        [canCreateProyect]="false"
-        [canCollaborate]="false"
-        [canViewCollaborations]="false"
-        [canExecuteProyect]="false"
-        [canCompleteCommitment]="false"
         [canCompleteProyect]="true"
-        (projectUpdated)="onProjectUpdated($event)">
+        [canViewObservationsHistory]="true"
+        (projectUpdated)="onProjectUpdated($event)"
+        emptyStateMessage="Actualmente no tienes proyectos en estado de ejecución. Los proyectos aparecerán aquí una vez que los ejecutes.">
     </app-projects-list>
 
     <!-- MIS PROYECTOS -->
     <app-projects-list 
         tableTitle="Mis Proyectos"
         [projects]="otherProjects" 
-        emptyStateMessage="No tienes proyectos pendientes de ejecución. Crea tu próximo proyecto."
         [canCreateProyect]="true"
-        [canCollaborate]="false"
         [canViewCollaborations]="true"
         [canExecuteProyect]="true"
-        [canCompleteCommitment]="false"
-        (projectUpdated)="onProjectUpdated($event)">
+        (projectUpdated)="onProjectUpdated($event)"
+        emptyStateMessage="No tienes proyectos pendientes de ejecución. Crea tu próximo proyecto.">
     </app-projects-list>
 </div>
