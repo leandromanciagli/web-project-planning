@@ -18,17 +18,6 @@
     <div class="bg-slate-900 p-6 rounded-xl border border-slate-800">
       <h2 class="text-xl font-semibold text-slate-100 mb-4">Información del Proyecto</h2>
 
-      <!-- <div class="mb-4 flex flex-col gap-2">
-        <label for="ong" class="text-slate-300 font-medium">ONG Originante *</label>
-        <select class="rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600" id="ong" formControlName="ong">
-          <option value="">Seleccione una ONG</option>
-          <option *ngFor="let ong of ongs" [value]="ong.id">{{ ong.organizationName }}</option>
-        </select>
-        <div class="text-rose-500 text-sm" *ngIf="isFieldInvalid('ong')">
-          {{ getFieldError('ong') }}
-        </div>
-      </div> -->
-
       <div class="mb-4 flex flex-col gap-2">
         <label for="name" class="text-slate-300 font-medium">Nombre del Proyecto *</label>
         <input 
@@ -93,9 +82,12 @@
             </div>
             <button 
               type="button" 
-              class="cursor-pointer px-4 py-2 rounded-md bg-rose-600 text-white hover:bg-rose-500 transition text-base"
+              class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-4 py-2 rounded-md bg-rose-600 text-white hover:bg-rose-500 transition text-base flex items-center gap-2"
               (click)="removeTask(i); $event.stopPropagation()"
               [disabled]="tasks.length === 1">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
               Eliminar
             </button>
           </div>
@@ -194,9 +186,14 @@
         </div>
       </div>
       <div class="flex justify-end mt-6">
-        <button type="button" class="cursor-pointer px-4 py-2 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 bg-[#059669] hover:bg-[#059669]/90 text-base" (click)="addTask()" [disabled]="projectForm.invalid">
+        <button 
+          type="button" 
+          class="cursor-pointer px-4 py-2 rounded-md text-white transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 bg-[#059669] hover:bg-[#059669]/90 text-base" 
+          (click)="addTask()" 
+          [disabled]="projectForm.invalid"
+        >
           <span class="text-lg leading-none">+</span>
-          Agregar Tarea
+          Agregar otra Tarea
         </button>
       </div>
     </div>
