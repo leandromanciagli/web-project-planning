@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { AuthService } from '@/services/auth.service';
 import { NavbarSection } from '@/services/navbar.service';
 import { Router, NavigationEnd } from '@angular/router';
@@ -17,6 +17,8 @@ export class NavbarComponent implements OnInit {
   isLoggedIn = false;
   currentRoute: string = '';
   sections: NavbarSection[] = [];
+  isSessionMenuOpen = false;
+  user: any = null;
 
   constructor(
     protected authService: AuthService, 
@@ -33,6 +35,7 @@ export class NavbarComponent implements OnInit {
     if (this.authService.isLoggedIn()) {
       this.isLoggedIn = true;
       this.sections = this.authService.getSectionsByRoles();
+      this.user = this.authService.getUser();
     }
 
     // Subscribirse al estado de login
@@ -40,8 +43,10 @@ export class NavbarComponent implements OnInit {
       this.isLoggedIn = status;
       if (status) {
         this.sections = this.authService.getSectionsByRoles();
+        this.user = this.authService.getUser();
       } else {
         this.sections = [];
+        this.user = null;
       }
     });
 
@@ -51,6 +56,38 @@ export class NavbarComponent implements OnInit {
         this.currentRoute = event.url;
       }
     });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.session-menu-container')) {
+      this.closeSessionMenu();
+    }
+  }
+
+  toggleSessionMenu(): void {
+    this.isSessionMenuOpen = !this.isSessionMenuOpen;
+  }
+
+  closeSessionMenu(): void {
+    this.isSessionMenuOpen = false;
+  }
+
+  logout(): void {
+    this.closeSessionMenu();
+    this.authService.logout();
+  }
+
+  getOrganizationName(): string {
+    return this.user?.firstname;
+  }
+
+  getRoles(): string[] {
+    if (!this.user?.roles || !Array.isArray(this.user.roles)) {
+      return [];
+    }
+    return this.user.roles.map((r: any) => r.displayName || r.name);
   }
 
 }
