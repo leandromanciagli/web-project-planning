@@ -56,6 +56,7 @@ export class ProjectsListComponent {
   @Input() canViewCollaborations: boolean = false;
   @Input() canExecuteProyect: boolean = false;
   @Input() canCompleteCommitment: boolean = false;
+  @Input() canCompleteLocalTask: boolean = false;
   @Input() canCompleteProyect: boolean = false;
   @Input() canGenerateObservations: boolean = false;
   @Input() canViewObservationsHistory: boolean = false;
@@ -70,6 +71,7 @@ export class ProjectsListComponent {
   tasks: Task[] = [];
   loadingTasks: Record<number, boolean> = {};
   loadingCompleteCommitment: Record<number, boolean> = {};
+  loadingCompleteLocalTask: Record<number, boolean> = {};
   loadingExecuteProject: Record<number, boolean> = {};
   loadingFinishProject: Record<number, boolean> = {};
   selectedTask: any = null;
@@ -121,51 +123,53 @@ export class ProjectsListComponent {
     private taskObservationService: TaskObservationService,
   ) {}
 
-  getTasks(project: Project) {
-    this.toggleExpand(project);
-    if (this.expanded[project.id]) {
-      this.loadingTasks[project.id] = true;
+  getTasks(projectId: number, toggle: boolean = true) {
+    if (toggle) {
+      this.toggleExpand(projectId);
+    }
+    if (this.expanded[projectId]) {
+      this.loadingTasks[projectId] = true;
       if (this.authService.hasRole('ONG_PRINCIPAL') || this.authService.hasRole('ONG_GERENCIAL')) {
-        this.taskService.getTasksByProject(project.id).subscribe({
+        this.taskService.getTasksByProject(projectId).subscribe({
           next: (res) => {
             this.tasks = res.data || [];
-            this.loadingTasks[project.id] = false;
+            this.loadingTasks[projectId] = false;
           },
           error: (error) => {
             console.error('Error obteniendo tareas:', error);
             alert('Error al cargar las tareas del proyecto');
-            this.loadingTasks[project.id] = false;
+            this.loadingTasks[projectId] = false;
           }
         });
       }
       if (this.authService.hasRole('ONG_COLABORADORA')) {
-        this.taskService.getCloudTasksByProject(project.id).subscribe({
+        this.taskService.getCloudTasksByProject(projectId).subscribe({
           next: (res) => {
             this.tasks = res.data || [];
-            this.loadingTasks[project.id] = false;
+            this.loadingTasks[projectId] = false;
           },
           error: (error) => {
             console.error('Error obteniendo tareas del cloud:', error);
             alert('Error al cargar las tareas del proyecto');
-            this.loadingTasks[project.id] = false;
+            this.loadingTasks[projectId] = false;
           }
         });
       }
     } else {
-      this.loadingTasks[project.id] = false;
+      this.loadingTasks[projectId] = false;
     }
   }
 
-  toggleExpand(project: Project) {
-    const isOpen = !!this.expanded[project.id];
+  toggleExpand(projectId: number) {
+    const isOpen = !!this.expanded[projectId];
     // Cerrar todos primero
     this.expanded = {};
     // Si el que clickeamos no estaba abierto, abrirlo
     if (!isOpen) {
-      this.expanded[project.id] = true;
+      this.expanded[projectId] = true;
       // Scroll suave hacia el proyecto expandido
       setTimeout(() => {
-        const el = document.getElementById(`project-row-${project.id}`) || document.getElementById(`project-collapse-${project.id}`);
+        const el = document.getElementById(`project-row-${projectId}`) || document.getElementById(`project-collapse-${projectId}`);
         el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
@@ -234,11 +238,7 @@ export class ProjectsListComponent {
         this.closeCreateCommitmentModal();
 
         // Refrescar las tareas del proyecto
-        this.loadingTasks[projectId] = true;
-        this.taskService.getTasksByProject(projectId).subscribe(tasksRes => {
-          this.tasks = tasksRes.data || [];
-          this.loadingTasks[projectId] = false;
-        });
+        this.getTasks(projectId, false);
       },
       error: (error) => {
         console.error('Error creando compromiso:', error);
@@ -280,19 +280,14 @@ export class ProjectsListComponent {
     if (!this.selectedTask || this.selectedCollaborationId == null) { return; }
     const projectId = this.selectedTask.projectId;
     this.loadingCreateCommitmentModal = true;
-    
     this.commitmentService.assignCommitment(projectId, this.selectedTask.id, this.selectedCollaborationId).subscribe({
       next: (res) => {
         this.loadingCreateCommitmentModal = false;
         alert('Solicitud de compromiso asignada exitosamente');
         this.closeRequestsForCommitmentModal();
-        
+
         // Refrescar las tareas del proyecto
-        this.loadingTasks[projectId] = true;
-        this.taskService.getTasksByProject(projectId).subscribe(tasksRes => {
-          this.tasks = tasksRes.data || [];
-          this.loadingTasks[projectId] = false;
-        });
+        this.getTasks(projectId, false);
 
         // Emitir evento al padre para que refresque los proyectos
         this.projectUpdated.emit(projectId);
@@ -344,6 +339,13 @@ export class ProjectsListComponent {
 
   executeProject(project: Project) {
     if (this.canExecuteProyect && project.status !== 'PLANIFICADO') { return; }
+    
+    // Confirmar antes de ejecutar el proyecto
+    const confirmMessage = `¿Está seguro de que desea ejecutar el proyecto "${project.name}"?`;
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
     this.loadingExecuteProject[project.id] = true;
     this.projectService.executeProject(project.id).subscribe({
       next: (res: any) => {
@@ -361,25 +363,46 @@ export class ProjectsListComponent {
     });
   }
 
+  submitLocalTaskDone(task: Task, event?: Event) {
+    if (event) { event.stopPropagation(); }
+    const projectId = task.projectId;
+    if (!task.isCoverageRequest) {
+      this.loadingCompleteLocalTask[task.id] = true;
+      this.taskService.markLocalTaskAsDone(task.id).subscribe({
+        next: (res) => {
+          this.loadingCompleteLocalTask[task.id] = false;
+          alert('Tarea marcada como cumplida exitosamente');
+
+          // Refrescar las tareas del proyecto
+          this.getTasks(projectId, false);
+
+          // Emitir evento al padre para que refresque los proyectos
+          this.projectUpdated.emit(projectId);
+        },
+        error: (error) => {
+          console.error('Error marcando tarea como cumplida:', error);
+          this.loadingCompleteLocalTask[task.id] = false;
+          alert('Error al marcar la tarea como cumplida. Por favor, intente nuevamente.');
+        }
+      });
+    }
+  }
+
   submitCommitmentDone(task: Task, event?: Event) {
     if (event) { event.stopPropagation(); }
+    const projectId = task.projectId;
     if (task.isCoverageRequest) {
       this.loadingCompleteCommitment[task.id] = true;
-      
       this.commitmentService.markCommitmentDone(this.getApprovedCommitment(task).id).subscribe({
         next: (res) => {
           this.loadingCompleteCommitment[task.id] = false;
           alert('Compromiso marcado como cumplido exitosamente');
 
           // Refrescar las tareas del proyecto
-          this.loadingTasks[task.projectId] = true;
-          this.taskService.getTasksByProject(task.projectId).subscribe(tasksRes => {
-            this.tasks = tasksRes.data || [];
-            this.loadingTasks[task.projectId] = false;
-          });
+          this.getTasks(projectId, false);
 
           // Emitir evento al padre para que refresque los proyectos
-          this.projectUpdated.emit(task.projectId);
+          this.projectUpdated.emit(projectId);
         },
         error: (error) => {
           console.error('Error marcando compromiso como cumplido:', error);
@@ -392,6 +415,13 @@ export class ProjectsListComponent {
 
   finishProject(project: Project) {
     if (this.canCompleteProyect && project.status !== 'COMPLETADO') { return; }
+
+    // Confirmar antes de finalizar el proyecto
+    const confirmMessage = `¿Estás seguro de finalizar el proyecto "${project.name}"?`;
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
     this.loadingFinishProject[project.id] = true;
     this.projectService.finishProject(project.id).subscribe({
       next: (res: any) => {

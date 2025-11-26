@@ -17,4 +17,12 @@
         (projectUpdated)="onProjectUpdated($event)"
         emptyStateMessage="No hay proyectos con pedidos de colaboración pendientes en este momento. Los proyectos que requieran tu colaboración aparecerán aquí.">
     </app-projects-list>
+
+    <!-- PROYECTOS FINALIZADOS EN LOS QUE COLABORÉ -->
+    <app-projects-list 
+        tableTitle="Proyectos Finalizados en los que Colaboré"
+        [projects]="finishedProjects" 
+        (projectUpdated)="onProjectUpdated($event)"
+        emptyStateMessage="No has colaborado en ningún proyecto finalizado en este momento. Los proyectos que finalicen tu colaboración aparecerán aquí.">
+    </app-projects-list>
 </div>

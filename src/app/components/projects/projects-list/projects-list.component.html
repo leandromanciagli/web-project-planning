@@ -22,7 +22,7 @@
       </thead>
       <tbody class="bg-slate-950 divide-y divide-slate-800">
         <ng-container *ngFor="let project of projects; trackBy: trackByProjectId">
-          <tr class="hover:bg-slate-900/40 cursor-pointer" (click)="getTasks(project)" [attr.id]="'project-row-' + project.id"
+          <tr class="hover:bg-slate-900/40 cursor-pointer" (click)="getTasks(project.id, true)" [attr.id]="'project-row-' + project.id"
               [ngClass]="expanded[project.id] ? 'bg-slate-900/60 ring-1 ring-indigo-600/40' : ''">
             <td class="px-4 text-slate-200" [ngClass]="{ 'py-5 text-xl font-semibold': expanded[project.id], 'py-3 text-base': !expanded[project.id] }">{{ project.name }}</td>
             <td class="px-4 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">
@@ -124,7 +124,7 @@
                             class="inline-flex items-center px-4 py-1 rounded-full text-sm font-medium"
                             [ngClass]="{
                               'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/30': task.status === 'todo' && task.takenBy === null,
-                              'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 ': task.status === 'todo' && task.takenBy !== null,
+                              'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30': task.status === 'todo' && task.takenBy !== null,
                               'bg-yellow-500/10 text-yellow-400 ring-1 ring-inset ring-yellow-500/30': task.status === 'in_progress',
                               'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30': task.status === 'done',
                             }"
@@ -136,14 +136,29 @@
                       <p class="mt-2 text-sm text-slate-300">{{ task.description }}</p>
                       <div class="mt-3 flex items-center justify-between">
                         <div class="flex items-center gap-2">
-                          <span class="text-sm text-white italic" *ngIf="task.isCoverageRequest">
-                            {{ task.takenBy !== null ? 'Asignado a ' + task.takenByUser.firstname : 'Tarea sin asignar' }}
+                          <span class="rounded-full px-4 py-1 bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 text-sm italic" *ngIf="task.takenBy != authService.getUser().id">
+                            {{ task.takenBy !== null ? 'Tarea asignada a ' + task.takenByUser.firstname : 'Tarea sin asignar' }}
                           </span>
-                          <span class="text-sm text-white italic" *ngIf="!task.isCoverageRequest">
-                            Asignado a tu Organización
+                          <span class="rounded-full px-4 py-1 bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 text-sm italic" *ngIf="task.takenBy == authService.getUser().id">
+                            Tarea asignada a tu organización
                           </span>
                         </div>
                         <div class="flex items-center gap-2">
+
+
+                          <!-- GENERAR COMPROMISO -->
+                          <button 
+                            *ngIf="canCollaborate && task.isCoverageRequest" 
+                            type="button" 
+                            (click)="openCreateCommitmentModal(task, project, $event)" 
+                            class="cursor-pointer px-3 py-1.5 rounded-md disabled:opacity-60 disabled:cursor-not-allowed text-white transition whitespace-nowrap text-sm bg-[#059669] hover:bg-[#059669]/90"
+                            [disabled]="task.takenBy != null || hasCommitment(task)"
+                          >
+                            Generar compromiso
+                          </button>
+
+
+                          <!-- VER SOLICITUDES DE COMPROMISO -->
                           <button 
                             *ngIf="canViewCollaborations && task.takenBy == null" 
                             type="button" 
@@ -153,28 +168,19 @@
                             Ver solicitudes de compromiso
                           </button>
                           
+
+                          <!-- VER COMPROMISO ASIGNADO -->
                           <button 
-                            *ngIf="canViewCollaborations && task.takenBy != null" 
+                            *ngIf="canViewCollaborations && task.takenBy != null && task.isCoverageRequest" 
                             type="button" 
                             (click)="openViewAssignedCommitmentModal(task, project, $event)" 
                             class="cursor-pointer px-3 py-1.5 rounded-md disabled:opacity-60 disabled:cursor-not-allowed bg-indigo-600 text-white hover:bg-indigo-500 transition whitespace-nowrap text-sm"
-                            [disabled]="!task.isCoverageRequest"
                           >
                             Ver compromiso asignado
                           </button>
                           
-                          <button 
-                            *ngIf="canCollaborate && task.isCoverageRequest" 
-                            type="button" 
-                            (click)="openCreateCommitmentModal(task, project, $event)" 
-                            class="cursor-pointer px-3 py-1.5 rounded-md disabled:opacity-60 disabled:cursor-not-allowed text-white transition whitespace-nowrap text-sm bg-[#059669] hover:bg-[#059669]/90"
-                            [disabled]="task.takenBy != null"
-                          >
-                            Generar compromiso
-                          </button>
-                          
 
-                          <!-- Botón normal cuando no está cargando -->
+                          <!-- MARCAR COMPROMISO COMO CUMPLIDO -->
                           <button 
                             *ngIf="canCompleteCommitment && !getObservationWithoutResolution(task) && !loadingCompleteCommitment[task.id]"
                             type="button" 
@@ -193,10 +199,31 @@
                             <span>Marcando como cumplido...</span>
                           </div>
 
-                          
-                          <span class="text-sm text-orange-400 italic mr-2" *ngIf="canGenerateObservations && getObservationWithoutResolution(task)">Tarea con resolución de observaciones pendiente</span>
+
+                          <!-- MARCAR TAREA LOCAL COMO CUMPLIDA -->
                           <button 
-                            *ngIf="canGenerateObservations && !getObservationWithoutResolution(task)"
+                            *ngIf="canCompleteLocalTask && !task.isCoverageRequest && !loadingCompleteLocalTask[task.id]"
+                            type="button" 
+                            (click)="submitLocalTaskDone(task, $event)" 
+                            class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-[#059669] text-slate-200 hover:bg-[#059669]/70 transition whitespace-nowrap text-sm"
+                            [disabled]="task.status === 'done'"
+                          >
+                            Marcar tarea como cumplida
+                          </button>
+                          <!-- Loader cuando se está marcando el compromiso como cumplido -->
+                          <div 
+                            *ngIf="canCompleteLocalTask && !task.isCoverageRequest && loadingCompleteLocalTask[task.id]"
+                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#059669] text-slate-200 whitespace-nowrap text-sm"
+                          >
+                            <div class="w-4 h-4 border-2 border-slate-200 border-t-transparent rounded-full animate-spin"></div>
+                            <span>Marcando como cumplida...</span>
+                          </div>
+
+
+                          <!-- GENERAR OBSERVACIÓN -->
+                          <span class="text-sm text-orange-400 italic mr-2" *ngIf="canGenerateObservations && task.isCoverageRequest && getObservationWithoutResolution(task)">Tarea con resolución de observaciones pendiente</span>
+                          <button 
+                            *ngIf="canGenerateObservations && task.isCoverageRequest && !getObservationWithoutResolution(task)"
                             type="button" 
                             (click)="openModalGenerateObservation(task)" 
                             class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-orange-500 text-slate-200 hover:bg-orange-500/70 transition whitespace-nowrap text-sm"
@@ -204,8 +231,11 @@
                           >
                             Generar observación
                           </button>
+
+                          
+                          <!-- VER HISTORIAL DE OBSERVACIONES -->
                           <button 
-                            *ngIf="canViewObservationsHistory || project.status === 'COMPLETADO' || project.status === 'FINALIZADO'" 
+                            *ngIf="canViewObservationsHistory && task.isCoverageRequest && (project.status === 'COMPLETADO' || project.status === 'FINALIZADO' || project.status === 'EN_EJECUCION')" 
                             type="button"
                             (click)="openModalViewObservationsHistory(task)"
                             class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-orange-500 text-slate-200 hover:bg-orange-500/70 transition whitespace-nowrap text-sm"
@@ -213,8 +243,10 @@
                             Ver historial de observaciones
                           </button>
                           
+
+                          <!-- RESOLVER OBSERVACIÓN -->
                           <button 
-                            *ngIf="canResolveObservations && getObservationWithoutResolution(task)"
+                            *ngIf="canResolveObservations && task.isCoverageRequest && getObservationWithoutResolution(task)"
                             type="button" 
                             (click)="openModalResolveObservation(task)" 
                             class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-orange-600 text-white hover:bg-orange-500 transition whitespace-nowrap text-sm"
