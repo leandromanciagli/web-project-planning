@@ -5,6 +5,7 @@
         [projects]="projectsInExecution" 
         [canCompleteProyect]="true"
         [canViewObservationsHistory]="true"
+        [canCompleteLocalTask]="true"
         (projectUpdated)="onProjectUpdated($event)"
         emptyStateMessage="Actualmente no tienes proyectos en estado de ejecución. Los proyectos aparecerán aquí una vez que los ejecutes.">
     </app-projects-list>

@@ -97,4 +97,31 @@ export class TaskService {
         })
       );
   }
+
+  /**
+   * Marks a local task as done
+   * @param taskId The task ID
+   * @returns Observable with the result
+   */
+  markLocalTaskAsDone(taskId: number): Observable<ApiResponse<any>> {
+    return this.http.put<any>(`${this.apiUrl}/tasks/local/${taskId}/done`, this.httpOptions)
+      .pipe(
+        map(response => {
+          return {
+            success: true,
+            data: response.data || [],
+            message: 'Tarea marcada como cumplida exitosamente'
+          };
+        }),
+        catchError(error => {
+          console.error('Error marking task as done:', error);
+          const errorMessage = error.error?.message || error.message || 'Error desconocido al marcar la tarea como cumplida';
+          return [{
+            success: false,
+            error: errorMessage,
+            message: 'Error al marcar la tarea como cumplida'
+          }];
+        })
+      );
+  }
 }
