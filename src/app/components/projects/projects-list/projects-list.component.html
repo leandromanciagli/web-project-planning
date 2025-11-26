@@ -26,7 +26,7 @@
               [ngClass]="expanded[project.id] ? 'bg-slate-900/60 ring-1 ring-indigo-600/40' : ''">
             <td class="px-4 text-slate-200" [ngClass]="{ 'py-5 text-xl font-semibold': expanded[project.id], 'py-3 text-base': !expanded[project.id] }">{{ project.name }}</td>
             <td class="px-4 text-center" [ngClass]="{ 'py-5 text-lg': expanded[project.id], 'py-3 text-sm': !expanded[project.id] }">
-              <span class="inline-flex items-center px-2.5 py-1.5 rounded-full font-medium"
+              <span class="inline-flex items-center px-6 py-1.5 rounded-full font-medium"
                     [ngClass]="{
                       'bg-indigo-500/10 text-indigo-400 ring-1 ring-inset ring-indigo-500/30 text-sm': project.status === 'GENERADO',
                       'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 text-sm': project.status === 'PLANIFICADO',
@@ -112,7 +112,7 @@
                           *ngIf="(project.status === 'GENERADO' || project.status === 'PLANIFICADO') && authService.hasRole('ONG_COLABORADORA') && hasCommitment(task); else estadoTarea" 
                           class="inline-flex items-center px-4 py-1 rounded-full text-sm font-medium"
                           [ngClass]="{
-                            'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 ': hasCommitment(task) === 'COMPROMISO PENDIENTE DE APROBACIÓN',
+                            'bg-indigo-500/10 text-indigo-400 ring-1 ring-inset ring-indigo-500/30 ': hasCommitment(task) === 'COMPROMISO PENDIENTE DE APROBACIÓN',
                             'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/30 ': hasCommitment(task) === 'COMPROMISO APROBADO',
                             'bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/30': hasCommitment(task) === 'COMPROMISO RECHAZADO',
                           }"
@@ -205,7 +205,7 @@
                             Generar observación
                           </button>
                           <button 
-                            *ngIf="canViewObservationsHistory" 
+                            *ngIf="canViewObservationsHistory || project.status === 'COMPLETADO' || project.status === 'FINALIZADO'" 
                             type="button"
                             (click)="openModalViewObservationsHistory(task)"
                             class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-orange-500 text-slate-200 hover:bg-orange-500/70 transition whitespace-nowrap text-sm"
@@ -341,8 +341,16 @@
       </div>
     </div>
 
+    <!-- Loader mientras se asigna el compromiso -->
+    <div *ngIf="loadingCreateCommitmentModal" class="mt-4 flex items-center justify-center py-8">
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-4 border-slate-700 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p class="text-slate-400 text-sm">Asignando compromiso...</p>
+      </div>
+    </div>
+
     <!-- Listado de solicitudes de compromiso -->
-    <div *ngIf="!loadingCollaborations">
+    <div *ngIf="!loadingCollaborations && !loadingCreateCommitmentModal">
       <h3 class="text-sm font-medium text-slate-400 mb-2">Solicitudes de compromiso</h3>
       <div class="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-2" *ngIf="collaborations?.length; else noCollabsTpl">
         <label class="block rounded-lg border border-slate-800 bg-slate-950 p-4 hover:bg-slate-800/40 transition cursor-pointer" *ngFor="let c of collaborations">
