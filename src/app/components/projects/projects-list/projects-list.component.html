@@ -182,7 +182,7 @@
 
                           <!-- MARCAR COMPROMISO COMO CUMPLIDO -->
                           <button 
-                            *ngIf="canCompleteCommitment && !getObservationWithoutResolution(task) && !loadingCompleteCommitment[task.id]"
+                            *ngIf="canCompleteCommitment && task.takenBy == authService.getUser().id && !getObservationWithoutResolution(task) && !loadingCompleteCommitment[task.id]"
                             type="button" 
                             (click)="submitCommitmentDone(task, $event)" 
                             class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-[#059669] text-slate-200 hover:bg-[#059669]/70 transition whitespace-nowrap text-sm"
