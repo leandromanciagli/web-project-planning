@@ -1,0 +1,173 @@
+<div class="kpi-dashboard-container">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">Dashboard de KPIs</h1>
+            <p class="dashboard-subtitle">Métricas y análisis de rendimiento en tiempo real</p>
+        </div>
+        <div class="header-actions">
+            <button (click)="refreshData()" class="refresh-btn"
+                [disabled]="isLoadingTotalTasks || isLoadingTodoTasks || isLoadingInProgressTasks || isLoadingDoneTasks">
+                <span
+                    [class.refresh-spin]="isLoadingTotalTasks || isLoadingTodoTasks || isLoadingInProgressTasks || isLoadingDoneTasks">↻</span>
+                Actualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="showError" class="error-banner">
+        <span>{{ errorMessage }}</span>
+        <button (click)="hideError()" class="error-close">×</button>
+    </div>
+
+    <!-- KPI Cards Grid -->
+    <div class="kpi-grid">
+
+        <!-- Total Tasks KPI -->
+        <div class="kpi-card total-tasks">
+            <div class="kpi-header">
+                <div class="kpi-indicator total-indicator"></div>
+                <div class="kpi-title">
+                    <h3>Tareas Totales</h3>
+                    <span class="kpi-subtitle">Todas las tareas del sistema</span>
+                </div>
+            </div>
+
+            <div class="kpi-content" *ngIf="!isLoadingTotalTasks && totalTasksData; else loadingTemplate">
+                <div class="metric-value">{{ totalTasksData.total }}</div>
+                <div class="metric-subtitle">Total de tareas en el sistema</div>
+
+                <!-- Line Chart -->
+                <div class="line-chart" *ngIf="totalTasksData.tasksPerDay && totalTasksData.tasksPerDay.length > 0">
+                    <svg class="chart-svg" viewBox="0 0 300 120">
+                        <polyline [attr.points]="getLinePoints(totalTasksData)" class="chart-line total-line"
+                            fill="none" stroke="#63b3ed" stroke-width="2">
+                        </polyline>
+                        <circle *ngFor="let day of totalTasksData.tasksPerDay; let i = index"
+                            [attr.cx]="getPointX(i, totalTasksData.tasksPerDay.length)"
+                            [attr.cy]="getPointY(getDayTotal(day), totalTasksData)" r="4" fill="#63b3ed"
+                            class="chart-point"
+                            (mouseenter)="showTooltip($event, day, getTaskTypeLabel(totalTasksData))"
+                            (mouseleave)="hideTooltip()">
+                        </circle>
+                    </svg>
+                    <div class="chart-legend">Evolución últimos {{ totalTasksData.tasksPerDay.length }} días</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Todo Tasks KPI -->
+        <div class="kpi-card todo-tasks">
+            <div class="kpi-header">
+                <div class="kpi-indicator todo-indicator"></div>
+                <div class="kpi-title">
+                    <h3>Tareas Pendientes</h3>
+                    <span class="kpi-subtitle">Por hacer</span>
+                </div>
+            </div>
+
+            <div class="kpi-content" *ngIf="!isLoadingTodoTasks && todoTasksData; else loadingTemplate">
+                <div class="metric-value">{{ todoTasksData.total }}</div>
+                <div class="metric-subtitle">Tareas por hacer</div>
+
+                <!-- Line Chart -->
+                <div class="line-chart" *ngIf="todoTasksData.tasksPerDay && todoTasksData.tasksPerDay.length > 0">
+                    <svg class="chart-svg" viewBox="0 0 300 120">
+                        <polyline [attr.points]="getLinePoints(todoTasksData)" class="chart-line todo-line" fill="none"
+                            stroke="#f6e05e" stroke-width="2">
+                        </polyline>
+                        <circle *ngFor="let day of todoTasksData.tasksPerDay; let i = index"
+                            [attr.cx]="getPointX(i, todoTasksData.tasksPerDay.length)"
+                            [attr.cy]="getPointY(getDayTotal(day), todoTasksData)" r="4" fill="#f6e05e"
+                            class="chart-point" (mouseenter)="showTooltip($event, day, getTaskTypeLabel(todoTasksData))"
+                            (mouseleave)="hideTooltip()">
+                        </circle>
+                    </svg>
+                    <div class="chart-legend">Evolución últimos {{ todoTasksData.tasksPerDay.length }} días</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Progress Tasks KPI -->
+        <div class="kpi-card progress-tasks">
+            <div class="kpi-header">
+                <div class="kpi-indicator progress-indicator"></div>
+                <div class="kpi-title">
+                    <h3>En Progreso</h3>
+                    <span class="kpi-subtitle">Trabajando ahora</span>
+                </div>
+            </div>
+
+            <div class="kpi-content" *ngIf="!isLoadingInProgressTasks && inProgressTasksData; else loadingTemplate">
+                <div class="metric-value">{{ inProgressTasksData.total }}</div>
+                <div class="metric-subtitle">Tareas en ejecución</div>
+
+                <!-- Line Chart -->
+                <div class="line-chart"
+                    *ngIf="inProgressTasksData.tasksPerDay && inProgressTasksData.tasksPerDay.length > 0">
+                    <svg class="chart-svg" viewBox="0 0 300 120">
+                        <polyline [attr.points]="getLinePoints(inProgressTasksData)" class="chart-line progress-line"
+                            fill="none" stroke="#fc8181" stroke-width="2">
+                        </polyline>
+                        <circle *ngFor="let day of inProgressTasksData.tasksPerDay; let i = index"
+                            [attr.cx]="getPointX(i, inProgressTasksData.tasksPerDay.length)"
+                            [attr.cy]="getPointY(getDayTotal(day), inProgressTasksData)" r="4" fill="#fc8181"
+                            class="chart-point"
+                            (mouseenter)="showTooltip($event, day, getTaskTypeLabel(inProgressTasksData))"
+                            (mouseleave)="hideTooltip()">
+                        </circle>
+                    </svg>
+                    <div class="chart-legend">Evolución últimos {{ inProgressTasksData.tasksPerDay.length }} días</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Done Tasks KPI -->
+        <div class="kpi-card done-tasks">
+            <div class="kpi-header">
+                <div class="kpi-indicator done-indicator"></div>
+                <div class="kpi-title">
+                    <h3>Completadas</h3>
+                    <span class="kpi-subtitle">Finalizadas</span>
+                </div>
+            </div>
+
+            <div class="kpi-content" *ngIf="!isLoadingDoneTasks && doneTasksData; else loadingTemplate">
+                <div class="metric-value">{{ doneTasksData.total }}</div>
+                <div class="metric-subtitle">Tareas finalizadas</div>
+
+                <!-- Line Chart -->
+                <div class="line-chart" *ngIf="doneTasksData.tasksPerDay && doneTasksData.tasksPerDay.length > 0">
+                    <svg class="chart-svg" viewBox="0 0 300 120">
+                        <polyline [attr.points]="getLinePoints(doneTasksData)" class="chart-line done-line" fill="none"
+                            stroke="#68d391" stroke-width="2">
+                        </polyline>
+                        <circle *ngFor="let day of doneTasksData.tasksPerDay; let i = index"
+                            [attr.cx]="getPointX(i, doneTasksData.tasksPerDay.length)"
+                            [attr.cy]="getPointY(getDayTotal(day), doneTasksData)" r="4" fill="#68d391"
+                            class="chart-point" (mouseenter)="showTooltip($event, day, getTaskTypeLabel(doneTasksData))"
+                            (mouseleave)="hideTooltip()">
+                        </circle>
+                    </svg>
+                    <div class="chart-legend">Evolución últimos {{ doneTasksData.tasksPerDay.length }} días</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Loading Template -->
+    <ng-template #loadingTemplate>
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <span>Cargando datos...</span>
+        </div>
+    </ng-template>
+
+</div>
+
+<!-- Dynamic Tooltip -->
+<div class="tooltip" *ngIf="tooltipVisible" [style.left.px]="tooltipX" [style.top.px]="tooltipY"
+    [innerHTML]="tooltipContent">
+</div>
