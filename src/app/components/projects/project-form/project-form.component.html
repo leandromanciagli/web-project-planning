@@ -69,15 +69,26 @@
         <h2 class="text-xl font-semibold text-slate-100">Tareas del Proyecto</h2>
       </div>
 
+      <!-- Mensaje de alerta si no hay al menos una tarea con colaborativa -->
+      <div 
+        *ngIf="tasks.invalid && tasks.hasError('atLeastOneCoverageRequest') && tasks.touched" 
+        class="mb-4 p-3 rounded-md bg-orange-900/20 border border-orange-700"
+      >
+        <p class="text-orange-400 text-sm m-0">
+          ⚠️ El proyecto debe tener al menos una tarea marcada como "Publicar como pedido de cobertura".
+        </p>
+      </div>
+
       <div class="flex flex-col gap-4" formArrayName="tasks">
         <div 
           *ngFor="let task of tasks.controls; let i = index" 
           [formGroupName]="i" 
-          class="rounded-lg border border-slate-700 bg-slate-800 p-4 shadow">
+          class="rounded-lg border border-slate-700 bg-slate-800/90 p-4 shadow"
+        >
           
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-700 hover:bg-slate-700/20 rounded-md -mx-2 px-2 cursor-pointer" (click)="toggleTaskCollapse(i)">
+          <div class="flex items-center justify-between border-slate-700 rounded-md px-2 cursor-pointer" (click)="toggleTaskCollapse(i)">
             <div class="flex items-center gap-2">
-              <span class="inline-block text-xs transition-transform" [class.rotate-90]="isTaskCollapsed(i)">▼</span>
+              <span class="inline-block text-xs transition-transform" [class.rotate-270]="isTaskCollapsed(i)">▼</span>
               <h3 class="m-0 text-slate-100 text-lg font-medium">Tarea {{ i + 1 }}</h3>
             </div>
             <button 
@@ -88,12 +99,12 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
-              Eliminar
+              Eliminar Tarea
             </button>
           </div>
 
           <div class="flex flex-col gap-4 overflow-hidden transition-all" [class.max-h-0]="isTaskCollapsed(i)" [class.opacity-0]="isTaskCollapsed(i)" [class.max-h-[1000px]]="!isTaskCollapsed(i)" [class.opacity-100]="!isTaskCollapsed(i)">
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 mx-1 mt-4 pt-4 border-t border-slate-700">
               <label [for]="'title-tarea-' + i" class="text-slate-300 font-medium">Título de la Tarea *</label>
               <div class="flex flex-row items-center gap-4">
                 <input 
@@ -103,12 +114,12 @@
                   class="flex-1 min-w-0 rounded-md bg-slate-950 border border-slate-700 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   [class.error]="isFieldInvalid('title', i)"
                   placeholder="Ingrese el título de la tarea">
-                <div class="flex items-center gap-3 px-4 py-2 rounded-md bg-slate-900 border border-slate-700">
+                <div class="cursor-pointer flex items-center gap-3 px-4 py-2 rounded-md bg-slate-900 border border-slate-700">
                   <input 
                     type="checkbox" 
                     [id]="'coverage-' + i"
                     formControlName="isCoverageRequest"
-                    class="w-5 h-5 accent-emerald-600 border-2 border-slate-500 rounded">
+                    class="cursor-pointer w-5 h-5 accent-emerald-600 border-2 border-slate-500 rounded">
                   <label [for]="'coverage-' + i" class="text-slate-300 font-medium m-0 select-none">
                     Publicar como pedido de cobertura
                   </label>
@@ -119,7 +130,7 @@
               </div>
             </div>
 
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 mx-1">
               <label [for]="'description-tarea-' + i" class="text-slate-300 font-medium">Descripción de la Tarea *</label>
               <textarea 
                 [id]="'description-tarea-' + i"
@@ -133,7 +144,7 @@
               </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mx-1 mb-1">
 
               <div class="flex flex-col gap-2">
                 <label [for]="'taskType-' + i" class="text-slate-300 font-medium">Tipo de Tarea *</label>
@@ -204,7 +215,7 @@
         Limpiar Formulario
       </button>
       <button type="submit" class="cursor-pointer px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-500 transition disabled:opacity-60 disabled:cursor-not-allowed text-base" [disabled]="projectForm.invalid || isSubmitting">
-        <span *ngIf="isSubmitting">Enviando...</span>
+        <span *ngIf="isSubmitting">Creando Proyecto...</span>
         <span *ngIf="!isSubmitting">Crear Proyecto</span>
       </button>
     </div>

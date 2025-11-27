@@ -109,6 +109,26 @@ export class ProjectFormComponent implements OnInit {
     return null;
   }
 
+  // Validador custom para asegurar que el proyecto posee al menos una tarea colaborativa
+  private atLeastOneCoverageRequestValidator(control: AbstractControl): ValidationErrors | null {
+    if (!(control instanceof FormArray)) {
+      return null;
+    }
+
+    const tasks = control.value;
+    if (!tasks || tasks.length === 0) {
+      return null;
+    }
+
+    const hasCoverageRequest = tasks.some((task: any) => task.isCoverageRequest === true);
+    
+    if (!hasCoverageRequest) {
+      return { atLeastOneCoverageRequest: true };
+    }
+
+    return null;
+  }
+
   constructor(
     private fb: FormBuilder,
     private projectService: ProjectService,
@@ -122,7 +142,7 @@ export class ProjectFormComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       startDate: ['', [Validators.required, this.startDateValidator.bind(this)]],
       endDate: ['', [Validators.required, this.endDateValidator.bind(this)]],
-      tasks: this.fb.array([])
+      tasks: this.fb.array([], this.atLeastOneCoverageRequestValidator.bind(this))
     });
   }
 
@@ -143,6 +163,13 @@ export class ProjectFormComponent implements OnInit {
     this.projectForm.get('endDate')?.valueChanges.subscribe(() => {
       this.tasks.controls.forEach(taskCtrl => {
         taskCtrl.get('dueDate')?.updateValueAndValidity();
+      });
+    });
+
+    // Suscribirse a cambios en isCoverageRequest de todas las tareas existentes
+    this.tasks.controls.forEach(taskCtrl => {
+      taskCtrl.get('isCoverageRequest')?.valueChanges.subscribe(() => {
+        this.tasks.updateValueAndValidity();
       });
     });
   }
@@ -171,13 +198,22 @@ export class ProjectFormComponent implements OnInit {
       dueDate: ['', [Validators.required, this.taskDueDateValidator.bind(this)]],
       estimatedHours: [1, [Validators.required, Validators.min(1)]],
       taskTypeId: ['', Validators.required],
-      isCoverageRequest: [false]
+      isCoverageRequest: [true]
     });
   }
 
   addTask(): void {
     const taskFormGroup = this.createTaskFormGroup();
     this.tasks.push(taskFormGroup);
+    
+    // Suscribirse a cambios en isCoverageRequest para actualizar la validación
+    const taskIndex = this.tasks.length - 1;
+    taskFormGroup.get('isCoverageRequest')?.valueChanges.subscribe(() => {
+      this.tasks.updateValueAndValidity();
+    });
+    
+    // Actualizar validación del FormArray después de agregar una tarea
+    this.tasks.updateValueAndValidity();
     
     // Colapsar todas las tasks existentes
     this.collapsedTasks = this.collapsedTasks.map(() => true);
@@ -196,10 +232,24 @@ export class ProjectFormComponent implements OnInit {
     if (this.tasks.length > 1) {
       this.tasks.removeAt(index);
       this.collapsedTasks.splice(index, 1); // Remover también el estado de colapso
+      
+      // Actualizar validación del FormArray después de remover una tarea
+      this.tasks.updateValueAndValidity();
     }
   }
 
   onSubmit(): void {
+    const tasks = this.projectForm.value.tasks || [];
+    const hasCoverageRequest = tasks.some((task: any) => task.isCoverageRequest === true);
+    
+    // Validar que al menos una tarea tenga isCoverageRequest = true
+    if (!hasCoverageRequest) {
+      this.markFormGroupTouched();
+      this.tasks.updateValueAndValidity();
+      alert('El proyecto debe tener al menos una tarea marcada como "Publicar como pedido de cobertura".');
+      return;
+    }
+
     if (this.projectForm.valid && !this.isSubmitting) {
       this.isSubmitting = true;
 
@@ -260,10 +310,6 @@ export class ProjectFormComponent implements OnInit {
         control.get(key)?.markAsTouched();
       });
     });
-  }
-
-  private generateId(): string {
-    return Math.random().toString(36).substr(2, 9);
   }
 
   resetForm(): void {
