@@ -10,13 +10,14 @@ import { ProjectFormComponent } from '@/components/projects/project-form/project
 import { MyProjectsComponent } from '@/views/my-projects/my-projects.component';
 import { CollaborationsComponent } from '@/views/collaborations/collaborations.component';
 import { MonitoringComponent } from '@/views/monitoring/monitoring.component';
+import { KpiDashboardComponent } from './views/kpi-dashboard/kpi-dashboard.component';
 
 export const routes: Routes = [
-  
+
   // Rutas públicas (solo accesibles si NO hay sesión)
   { path: 'login', component: LoginComponent, canActivate: [NoAuthGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [NoAuthGuard] },
-  
+
   // Rutas protegidas (requieren autenticación)
   {
     path: 'app',
@@ -27,10 +28,11 @@ export const routes: Routes = [
       { path: 'my-projects', component: MyProjectsComponent },
       { path: 'collaborations', component: CollaborationsComponent },
       { path: 'monitoring', component: MonitoringComponent },
+      { path: 'kpi-dashboard', component: KpiDashboardComponent },
       { path: 'my-projects/create-project', component: ProjectFormComponent }
     ]
   },
-  
+
   // Redirecciones
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
