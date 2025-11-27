@@ -104,7 +104,7 @@ export class TaskService {
    * @returns Observable with the result
    */
   markLocalTaskAsDone(taskId: number): Observable<ApiResponse<any>> {
-    return this.http.put<any>(`${this.apiUrl}/tasks/local/${taskId}/done`, this.httpOptions)
+    return this.http.post<any>(`${this.apiUrl}/tasks/local/${taskId}/done`, { username: 'walter.bates', password: 'bpm' }, this.httpOptions)
       .pipe(
         map(response => {
           return {
