@@ -22,8 +22,8 @@ export class TaskObservationService {
     );
   }
 
-  resolveTaskObservation(taskObservationId: number, resolution: string, userId: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/cloud-tasks/extension/resolveTaskObservation`, { observationId: taskObservationId, resolution: resolution, userId: userId, username: 'walter.bates', password: 'bpm' }).pipe(
+  resolveTaskObservation(taskObservationId: number, resolution: string, userId: number, bonitaCaseId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/cloud-tasks/extension/resolveTaskObservation`, { observationId: taskObservationId, resolution: resolution, userId: userId, bonitaCaseId: bonitaCaseId, username: 'walter.bates', password: 'bpm' }).pipe(
       map(response => response.data || [])
     );
   }

@@ -505,10 +505,11 @@ export class ProjectsListComponent {
     this.resolution = '';
   }
 
-  submitResolveObservation(): void {
+  submitResolveObservation(observation: any): void {
+    console.log('observation', observation);
     this.loadingResolveObservation = true;
     const projectId = this.selectedTask.projectId;
-    this.taskObservationService.resolveTaskObservation(this.observation.id, this.resolution, this.authService.getUser().id).subscribe({
+    this.taskObservationService.resolveTaskObservation(observation.id, this.resolution, this.authService.getUser().id, observation.bonitaCaseId).subscribe({
       next: (res: any) => {
         this.loadingResolveObservation = false;
         this.closeModalResolveObservation();

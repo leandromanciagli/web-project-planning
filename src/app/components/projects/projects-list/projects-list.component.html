@@ -253,7 +253,7 @@
 
                           <!-- RESOLVER OBSERVACIÓN -->
                           <button 
-                            *ngIf="canResolveObservations && task.isCoverageRequest && getObservationWithoutResolution(task)"
+                            *ngIf="canResolveObservations && task.takenBy == authService.getUser().id && task.isCoverageRequest && getObservationWithoutResolution(task)"
                             type="button" 
                             (click)="openModalResolveObservation(task)" 
                             class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-orange-600 text-white hover:bg-orange-500 transition whitespace-nowrap text-sm"
@@ -809,7 +809,7 @@
         </button>
         <button type="button" [disabled]="loadingResolveObservation || !resolution.trim()"
           class="cursor-pointer px-4 py-2 rounded-md bg-orange-600 text-white hover:bg-orange-500 disabled:opacity-60 disabled:cursor-not-allowed"
-          (click)="submitResolveObservation()">
+          (click)="submitResolveObservation(observation)">
           Resolver observación
         </button>
       </div>
