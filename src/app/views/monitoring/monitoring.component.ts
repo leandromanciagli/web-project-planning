@@ -20,7 +20,7 @@ import { AuthService } from '@/services/auth.service';
 
 export class MonitoringComponent implements OnInit {
   projectsInExecution: any[] = [];
-
+  finishedProjects: any[] = [];
   constructor(
     private projectService: ProjectService,
     private authService: AuthService
@@ -28,6 +28,7 @@ export class MonitoringComponent implements OnInit {
 
   ngOnInit(): void {
     this.getRunningProjects();
+    this.getFinishedProjects();
   }
 
   isGerencialUser(): boolean {
@@ -35,8 +36,14 @@ export class MonitoringComponent implements OnInit {
   }
 
   getRunningProjects(): void {
-    this.projectService.getProjects({ status: ['EN_EJECUCION'] }).subscribe(res => {
+    this.projectService.getProjects({ status: ['EN_EJECUCION', 'COMPLETADO'] }).subscribe(res => {
       this.projectsInExecution = res.data || [];
+    });
+  }
+
+  getFinishedProjects(): void {
+    this.projectService.getProjects({ status: ['FINALIZADO'] }).subscribe(res => {
+      this.finishedProjects = res.data || [];
     });
   }
 
