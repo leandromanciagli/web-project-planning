@@ -106,8 +106,10 @@
                     </div>
                     <!-- Listado de tareas -->
                     <div class="rounded-lg border border-slate-800 bg-slate-900 p-4" *ngFor="let task of tasks">
-                      <div class="flex items-center justify-between">
-                        <h4 class="text-slate-200 font-medium">{{ task.title }}</h4>
+                      <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-slate-200 font-medium text-lg">
+                          {{ task.title }}
+                        </h4>
                         <span 
                           *ngIf="(project.status === 'GENERADO' || project.status === 'PLANIFICADO') && authService.hasRole('ONG_COLABORADORA') && hasCommitment(task); else estadoTarea" 
                           class="inline-flex items-center px-4 py-1 rounded-full text-sm font-medium"
@@ -142,6 +144,12 @@
                           <span class="rounded-full px-4 py-1 bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/30 text-sm italic" *ngIf="task.takenBy == authService.getUser().id">
                             Tarea asignada a tu organización
                           </span>
+                        <span 
+                          class="rounded-full px-4 py-1 bg-orange-500/10 text-orange-400 ring-1 ring-inset ring-orange-500/30 text-sm italic"
+                          *ngIf="canGenerateObservations && task.isCoverageRequest && getObservationWithoutResolution(task)"
+                        >
+                          Tarea con resolución de observaciones pendiente
+                        </span>
                         </div>
                         <div class="flex items-center gap-2">
 
@@ -221,13 +229,12 @@
 
 
                           <!-- GENERAR OBSERVACIÓN -->
-                          <span class="text-sm text-orange-400 italic mr-2" *ngIf="canGenerateObservations && task.isCoverageRequest && getObservationWithoutResolution(task)">Tarea con resolución de observaciones pendiente</span>
                           <button 
-                            *ngIf="canGenerateObservations && task.isCoverageRequest && !getObservationWithoutResolution(task)"
+                            *ngIf="canGenerateObservations && task.isCoverageRequest"
                             type="button" 
                             (click)="openModalGenerateObservation(task)" 
                             class="disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer px-3 py-1.5 rounded-md bg-orange-500 text-slate-200 hover:bg-orange-500/70 transition whitespace-nowrap text-sm"
-                            [disabled]="task.status === 'done'"
+                            [disabled]="task.status === 'done' || getObservationWithoutResolution(task)"
                           >
                             Generar observación
                           </button>

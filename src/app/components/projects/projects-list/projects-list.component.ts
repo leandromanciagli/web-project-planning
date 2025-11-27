@@ -129,7 +129,6 @@ export class ProjectsListComponent {
     }
     if (this.expanded[projectId]) {
       this.loadingTasks[projectId] = true;
-      if (this.authService.hasRole('ONG_PRINCIPAL') || this.authService.hasRole('ONG_GERENCIAL')) {
         this.taskService.getTasksByProject(projectId).subscribe({
           next: (res) => {
             this.tasks = res.data || [];
@@ -141,20 +140,6 @@ export class ProjectsListComponent {
             this.loadingTasks[projectId] = false;
           }
         });
-      }
-      if (this.authService.hasRole('ONG_COLABORADORA')) {
-        this.taskService.getCloudTasksByProject(projectId).subscribe({
-          next: (res) => {
-            this.tasks = res.data || [];
-            this.loadingTasks[projectId] = false;
-          },
-          error: (error) => {
-            console.error('Error obteniendo tareas del cloud:', error);
-            alert('Error al cargar las tareas del proyecto');
-            this.loadingTasks[projectId] = false;
-          }
-        });
-      }
     } else {
       this.loadingTasks[projectId] = false;
     }
@@ -209,6 +194,7 @@ export class ProjectsListComponent {
   }
 
   hasCommitment(task: Task): any {
+    if (!task.isCoverageRequest) { return false; }
     const commitment = task.commitments.find((commitment: any) => commitment.ongId == this.authService.getUser().id);
     return commitment ? this.getCommitmentStatusName(commitment.status) : '';
   }
@@ -234,8 +220,8 @@ export class ProjectsListComponent {
     this.commitmentService.createCommitment(commitment).subscribe({
       next: (commitment) => {
         this.loadingCreateCommitmentModal = false;
-        alert('Solicitud de compromiso creada exitosamente');
         this.closeCreateCommitmentModal();
+        alert('Solicitud de compromiso creada exitosamente');
 
         // Refrescar las tareas del proyecto
         this.getTasks(projectId, false);
@@ -283,8 +269,8 @@ export class ProjectsListComponent {
     this.commitmentService.assignCommitment(projectId, this.selectedTask.id, this.selectedCollaborationId).subscribe({
       next: (res) => {
         this.loadingCreateCommitmentModal = false;
-        alert('Solicitud de compromiso asignada exitosamente');
         this.closeRequestsForCommitmentModal();
+        alert('Solicitud de compromiso asignada exitosamente');
 
         // Refrescar las tareas del proyecto
         this.getTasks(projectId, false);
@@ -388,7 +374,7 @@ export class ProjectsListComponent {
     }
   }
 
-  submitCommitmentDone(task: Task, event?: Event) {
+  submitCommitmentDone(task: Task, event?: Event) {    
     if (event) { event.stopPropagation(); }
     const projectId = task.projectId;
     if (task.isCoverageRequest) {
@@ -447,17 +433,14 @@ export class ProjectsListComponent {
 
   submitGenerateObservation(): void {
     this.loadingGenerateObservation = true;
+    const projectId = this.selectedTask.projectId;
     this.taskObservationService.createTaskObservation({ taskId: this.selectedTask.id, observation: this.observationDescription, userId: this.authService.getUser().id }).subscribe(res => {
       this.loadingGenerateObservation = false;
       this.closeModalGenerateObservation();
       alert('Observación generada exitosamente');
 
       // Refrescar las tareas del proyecto
-      this.loadingTasks[this.selectedTask.projectId] = true;
-      this.taskService.getTasksByProject(this.selectedTask.projectId).subscribe(tasksRes => {
-        this.tasks = tasksRes.data || [];
-        this.loadingTasks[this.selectedTask.projectId] = false;
-      });
+      this.getTasks(projectId, false);
 
     });
   }
@@ -503,6 +486,7 @@ export class ProjectsListComponent {
   }
 
   getObservationWithoutResolution(task: Task): any {
+    if (!task.isCoverageRequest) { return null; }
     return task.observations.find((observation: any) => observation.resolution === null);
   }
 
@@ -523,19 +507,16 @@ export class ProjectsListComponent {
 
   submitResolveObservation(): void {
     this.loadingResolveObservation = true;
+    const projectId = this.selectedTask.projectId;
     this.taskObservationService.resolveTaskObservation(this.observation.id, this.resolution, this.authService.getUser().id).subscribe({
       next: (res: any) => {
         this.loadingResolveObservation = false;
+        this.closeModalResolveObservation();
         alert('Observación resuelta exitosamente');
         
         // Refrescar las tareas del proyecto
-        this.loadingTasks[this.selectedTask.projectId] = true;
-        this.taskService.getTasksByProject(this.selectedTask.projectId).subscribe(tasksRes => {
-          this.tasks = tasksRes.data || [];
-          this.loadingTasks[this.selectedTask.projectId] = false;
-        });
+        this.getTasks(projectId, false);
 
-        this.closeModalResolveObservation();
       },
       error: (error: any) => {
         console.error(error);
