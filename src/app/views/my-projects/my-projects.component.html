@@ -13,11 +13,21 @@
     <!-- MIS PROYECTOS -->
     <app-projects-list 
         tableTitle="Mis Proyectos"
-        [projects]="otherProjects" 
+        [projects]="pendingProjects" 
         [canCreateProyect]="true"
         [canViewCollaborations]="true"
         [canExecuteProyect]="true"
         (projectUpdated)="onProjectUpdated($event)"
         emptyStateMessage="No tienes proyectos pendientes de ejecución. Crea tu próximo proyecto.">
+    </app-projects-list>
+
+    <!-- MIS PROYECTOS FINALIZADOS -->
+    <app-projects-list 
+        tableTitle="Mis Proyectos Finalizados"
+        [projects]="finishedProjects" 
+        [canViewCollaborations]="true"
+        [canViewObservationsHistory]="true"
+        (projectUpdated)="onProjectUpdated($event)"
+        emptyStateMessage="No tienes proyectos finalizados. Los proyectos aparecerán aquí una vez que finalicen.">
     </app-projects-list>
 </div>

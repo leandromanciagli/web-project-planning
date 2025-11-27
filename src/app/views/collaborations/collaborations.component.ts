@@ -36,7 +36,7 @@ export class CollaborationsComponent implements OnInit {
   }
 
   getOtherProjects(): void {
-    this.projectService.getProjects({ status: ['GENERADO'] }).subscribe(res => {
+    this.projectService.getProjects({ status: ['GENERADO', 'PLANIFICADO'] }).subscribe(res => {
       this.otherProjects = res.data || [];
     });
   }

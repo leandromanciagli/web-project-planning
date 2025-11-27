@@ -12,7 +12,9 @@ import { AuthService } from '@/services/auth.service';
 })
 export class MyProjectsComponent implements OnInit {
   projectsInExecution: any[] = [];
-  otherProjects: any[] = [];
+  pendingProjects: any[] = [];
+  finishedProjects: any[] = [];
+
 
   constructor(
     private projectService: ProjectService,
@@ -21,7 +23,8 @@ export class MyProjectsComponent implements OnInit {
 
   ngOnInit(): void {
     this.getRunningProjects();
-    this.getOtherProjects();
+    this.getPendingProjects();
+    this.getFinishedProjects();
   }
 
   getRunningProjects(): void {
@@ -32,17 +35,26 @@ export class MyProjectsComponent implements OnInit {
     });
   }
 
-  getOtherProjects(): void {
+  getPendingProjects(): void {
     const user = this.authService.getUser();
     const userId = user?.id;
-    this.projectService.getProjects({ status: ['GENERADO', 'PLANIFICADO', 'FINALIZADO'], createdBy: userId }).subscribe(res => {
-        this.otherProjects = res.data || [];
+    this.projectService.getProjects({ status: ['GENERADO', 'PLANIFICADO'], createdBy: userId }).subscribe(res => {
+        this.pendingProjects = res.data || [];
     });    
   }
 
+  getFinishedProjects(): void {
+    const user = this.authService.getUser();
+    const userId = user?.id;
+    this.projectService.getProjects({ status: ['FINALIZADO'], createdBy: userId }).subscribe(res => {
+      this.finishedProjects = res.data || [];
+    });
+  }
+
   onProjectUpdated(projectId: number): void {
-    // Refrescar ambos listados de proyectos cuando se actualiza un proyecto
+    // Refrescar listados de proyectos cuando se actualiza un proyecto
     this.getRunningProjects();
-    this.getOtherProjects();
+    this.getPendingProjects();
+    this.getFinishedProjects();
   }
 }
